@@ -38,12 +38,12 @@ const LS = {
 ========================= */
 
 const defaultCameras = [
-  { name:"Nikon D610",          status:"in", user:"Available", image:"images/nikon_d610.png",         disabled:false, takeHome:false },
-  { name:"Nikon Z6 II",         status:"in", user:"Available", image:"images/nikon_z6ii.png",          disabled:false, takeHome:false },
-  { name:"Nikon Z6 II Big Lens",status:"in", user:"Available", image:"images/nikon_z6ii_big_lens.png", disabled:false, takeHome:false },
-  { name:"Sony A7",             status:"in", user:"Available", image:"images/sony_a7.png",             disabled:false, takeHome:false },
-  { name:"Canon Backup",        status:"in", user:"Available", image:"images/no_camera.png",           disabled:false, takeHome:false },
-  { name:"Spare Camera",        status:"in", user:"Available", image:"images/no_camera.png",           disabled:false, takeHome:false }
+  { name:"Nikon D610",          status:"in", user:"Available", image:"images/cameras/nikon_d610.png",         disabled:false, takeHome:false },
+  { name:"Nikon Z6 II",         status:"in", user:"Available", image:"images/cameras/nikon_z6ii.png",          disabled:false, takeHome:false },
+  { name:"Nikon Z6 II Big Lens",status:"in", user:"Available", image:"images/cameras/nikon_z6ii_big_lens.png", disabled:false, takeHome:false },
+  { name:"Sony A7",             status:"in", user:"Available", image:"images/cameras/sony_a7.png",             disabled:false, takeHome:false },
+  { name:"Canon Backup",        status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false },
+  { name:"Spare Camera",        status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false }
 ];
 
 const defaultUsers = {
@@ -213,7 +213,7 @@ adminToggle.onclick = () => {
     loggedInAdmin = null;
 
     adminTabs.classList.add("hidden");
-    adminToggle.src = "images/admin_icon_off.png";
+    adminToggle.src = "images/ui/admin_icon_off.png";
 
     activeTab = "cameras";
     updateAdminGlow();
@@ -735,7 +735,7 @@ function handleScan(id){
       loggedInAdmin = name;
 
       adminTabs.classList.remove("hidden");
-      adminToggle.src = "images/admin_icon_on.png";
+      adminToggle.src = "images/ui/admin_icon_on.png";
 
       // show admin footer buttons
       undoBtn.classList.remove("hidden");
@@ -834,7 +834,7 @@ function openCameraModal(index){
   if(index === null){
     cameraModalTitle.textContent = "Add Camera";
     cameraNameInput.value        = "";
-    imagePreview.src             = "images/no_camera.png";
+    imagePreview.src             = "images/cameras/no_camera.png";
     cameraTakeHome.checked       = false;
   } else {
     const cam = cameras[index];
@@ -887,7 +887,7 @@ saveCameraBtn.onclick = () => {
     // ADD
     cameras.push({
       name,
-      image    : cameraImageData || "images/no_camera.png",
+      image    : cameraImageData || "images/cameras/no_camera.png",
       status   : "in",
       user     : "Available",
       disabled : false,
