@@ -175,30 +175,18 @@ body{
   justify-content:center;
 }
 
-/* FIXES FULLSCREEN HUGE CARDS */
-
 @media (orientation:landscape){
-
   .camera-grid{
     grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(260px,320px)
-    );
+      repeat(auto-fill, minmax(260px, 320px));
   }
-
 }
 
 @media (orientation:portrait){
-
   .camera-grid{
     grid-template-columns:
-    repeat(
-      2,
-      minmax(140px,1fr)
-    );
+      repeat(2, minmax(140px, 1fr));
   }
-
 }
 
 /* =========================================
@@ -206,29 +194,18 @@ body{
 ========================================= */
 
 .camera-card{
-
   background:#fff;
-
   border-radius:22px;
-
   overflow:hidden;
-
   display:flex;
   flex-direction:column;
-
-  box-shadow:
-  0 8px 20px rgba(0,0,0,.08);
-
-  transition:
-  transform .15s ease,
-  box-shadow .15s ease;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .camera-card:hover{
   transform:translateY(-3px);
-
-  box-shadow:
-  0 14px 30px rgba(0,0,0,.12);
+  box-shadow:0 14px 30px rgba(0,0,0,.12);
 }
 
 /* =========================================
@@ -237,12 +214,9 @@ body{
 
 .camera-image{
   width:100%;
-
   aspect-ratio:1/1;
-
   background-size:cover;
   background-position:center;
-
   background-color:#e9e9e9;
 }
 
@@ -251,18 +225,12 @@ body{
 ========================================= */
 
 .camera-status{
-
   margin:14px auto 10px;
-
   padding:8px 18px;
-
   border-radius:999px;
-
   font-size:.9rem;
   font-weight:600;
-
   text-align:center;
-
   max-width:90%;
 }
 
@@ -281,15 +249,10 @@ body{
 ========================================= */
 
 .camera-footer{
-
   background:#d9d9d9;
-
   padding:16px 10px;
-
   text-align:center;
-
   font-weight:700;
-
   font-size:1rem;
 }
 
@@ -310,16 +273,12 @@ body{
 ========================================= */
 
 .add-camera-card{
-
   border:3px dashed #bfbfbf;
-
   background:#f8f8f8;
-
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-
   cursor:pointer;
 }
 
@@ -329,17 +288,13 @@ body{
 }
 
 .add-camera-image{
-
   width:100%;
   aspect-ratio:1/1;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   font-size:64px;
   font-weight:300;
-
   color:#666;
 }
 
@@ -348,27 +303,18 @@ body{
 ========================================= */
 
 .bottom-bar{
-
   position:fixed;
-
   left:96px;
   right:0;
   bottom:0;
-
   height:46px;
-
   background:#000;
   color:#fff;
-
   display:flex;
   align-items:center;
   justify-content:space-between;
-
   padding:0 18px;
-
-  box-shadow:
-  0 -2px 8px rgba(0,0,0,.15);
-
+  box-shadow:0 -2px 8px rgba(0,0,0,.15);
   z-index:50;
 }
 
@@ -387,16 +333,11 @@ body{
 }
 
 .footer-button{
-
   height:30px;
-
   padding:0 12px;
-
   border:none;
   border-radius:999px;
-
   cursor:pointer;
-
   font-size:.8rem;
   font-weight:600;
 }
@@ -411,244 +352,165 @@ body{
 
 .admin-camera-controls{
   padding:12px;
-
   display:flex;
   flex-direction:column;
-
   gap:8px;
+}
+
+.admin-camera-controls button{
+  height:42px;
+  border:none;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:.85rem;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.admin-camera-controls button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
 }
 
 /* =========================================
    SPLIT CHECK IN / CHECK OUT
-   (fills one button row)
 ========================================= */
 
-.admin-split-buttons{
-  display:grid;
-
-  grid-template-columns:1fr 1fr;
-
-  gap:6px;
+.admin-split-button{
+  display:flex;
+  gap:8px;
 }
 
-.admin-split-buttons button{
-  height:42px;
-
+.admin-split-button button{
+  flex:1;
+  height:44px;
   border:none;
   border-radius:999px;
-
   cursor:pointer;
-
   font-weight:700;
   font-size:.85rem;
-
-  transition:.15s ease;
+  transition:transform .15s ease, box-shadow .15s ease;
 }
 
-/* =========================================
-   STANDARD ADMIN BUTTONS
-========================================= */
-
-.admin-camera-controls button{
-
-  height:42px;
-
-  border:none;
-  border-radius:999px;
-
-  cursor:pointer;
-
-  font-weight:700;
-  font-size:.85rem;
-
-  transition:
-  transform .15s ease,
-  box-shadow .15s ease,
-  filter .15s ease;
-}
-
-.admin-camera-controls button:hover{
-
+.admin-split-button button:hover{
   transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
 
-  box-shadow:
-  0 6px 16px rgba(0,0,0,.12);
+.checkin-btn{
+  background:#e6f6ec;
+  color:#13703a;
+}
+
+.checkout-btn{
+  background:#e8f0ff;
+  color:#1a52d9;
 }
 
 /* =========================================
    BUTTON COLORS
 ========================================= */
 
-.admin-btn-in{
-  background:#e6f6ec;
-  color:#13703a;
-}
-
-.admin-btn-out{
-  background:#e8f0ff;
-  color:#1a52d9;
-}
-
-.admin-btn-edit{
-  background:#fff4d9;
-  color:#8f6700;
-}
-
-.admin-btn-delete{
-  background:#fdeaea;
-  color:#a31c1c;
-}
-
-.admin-btn-disable{
-  background:#ffe6e6;
-  color:#b51616;
-}
-
-.admin-btn-enable{
-  background:#ddf8e6;
-  color:#0d7a39;
-}
-
-.admin-btn-history{
-  background:#f0f0f0;
-  color:#444;
-}
-
-/* =========================================
-   ADD STAFF BUTTON
-========================================= */
-
-.add-staff-wrapper{
-  width:100%;
-}
-
-.add-staff-btn{
-
-  width:100%;
-  height:48px;
-
-  border:none;
-  border-radius:16px;
-
-  background:#000;
-  color:#fff;
-
-  font-weight:700;
-  font-size:.95rem;
-
-  cursor:pointer;
-
-  transition:.15s ease;
-}
-
-.add-staff-btn:hover{
-  transform:translateY(-2px);
-}
+.admin-btn-in      { background:#e6f6ec; color:#13703a; }
+.admin-btn-out     { background:#e8f0ff; color:#1a52d9; }
+.admin-btn-edit    { background:#fff4d9; color:#8f6700; }
+.admin-btn-delete  { background:#fdeaea; color:#a31c1c; }
+.admin-btn-disable { background:#ffe6e6; color:#b51616; }
+.admin-btn-enable  { background:#ddf8e6; color:#0d7a39; }
+.admin-btn-history { background:#f0f0f0; color:#444;    }
 
 /* =========================================
    STAFF CARD
 ========================================= */
 
 .staff-card{
-
   background:#fff;
-
   border-radius:22px;
-
   overflow:hidden;
-
-  box-shadow:
-  0 8px 20px rgba(0,0,0,.08);
-
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
   display:flex;
   flex-direction:column;
 }
 
 .staff-name{
-
   padding:18px;
-
   text-align:center;
-
   font-size:1rem;
   font-weight:700;
 }
 
 .staff-id{
-
   text-align:center;
-
   padding-bottom:14px;
-
   color:#666;
-
   font-size:.9rem;
 }
 
 .staff-admin-badge{
-
   margin:0 auto 14px;
-
   padding:6px 14px;
-
   border-radius:999px;
-
   background:#e6f6ec;
-
   color:#13703a;
-
   font-weight:700;
-
   font-size:.8rem;
 }
 
-/* =========================================
-   STAFF CONTROLS
-========================================= */
-
 .staff-controls{
-
   padding:12px;
-
   display:grid;
-
-  grid-template-columns:
-  repeat(2,1fr);
-
+  grid-template-columns:repeat(2,1fr);
   gap:6px;
 }
 
 .staff-controls button{
-
   height:38px;
-
   border:none;
   border-radius:999px;
-
   cursor:pointer;
-
   font-size:.8rem;
+  font-weight:700;
+  transition:transform .15s ease;
+}
+
+.staff-controls button:hover{
+  transform:translateY(-2px);
+}
+
+.staff-edit   { background:#fff4d9; color:#8f6700; }
+.staff-delete { background:#fdeaea; color:#a31c1c; }
+.staff-admin  { background:#ddf8e6; color:#0d7a39; }
+.staff-history{ background:#ececec; color:#444;    }
+
+/* =========================================
+   LOG CARD
+========================================= */
+
+.log-card{
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+.log-title{
+  background:#d9d9d9;
+  padding:14px;
+  text-align:center;
   font-weight:700;
 }
 
-.staff-edit{
-  background:#fff4d9;
-  color:#8f6700;
+.log-detail{
+  padding:16px;
+  text-align:center;
 }
 
-.staff-delete{
-  background:#fdeaea;
-  color:#a31c1c;
-}
-
-.staff-admin{
-  background:#ddf8e6;
-  color:#0d7a39;
-}
-
-.staff-history{
-  background:#ececec;
-  color:#444;
+.log-footer{
+  background:#f4f4f4;
+  padding:12px;
+  text-align:center;
+  font-size:.85rem;
+  color:#666;
 }
 
 /* =========================================
@@ -658,7 +520,6 @@ body{
 #cameraToolbar,
 #logFilters,
 #staffToolbar{
-
   display:flex;
   gap:10px;
   align-items:center;
@@ -675,83 +536,275 @@ body{
 #logFilters input,
 #logFilters select,
 #staffToolbar input{
-
   min-width:180px;
-
   background:#fff;
-
   border:none;
-
   border-radius:999px;
-
   padding:0 14px;
-
   height:38px;
 }
 
 /* =========================================
-   LOG CARD
+   MODALS — BACKDROP + CENTERING
+   THIS WAS THE MISSING BLOCK
 ========================================= */
 
-.log-card{
+.modal{
+  position:fixed;
+  inset:0;                          /* top/right/bottom/left all 0 */
+  z-index:200;
 
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,.55);       /* dark backdrop */
+
+  padding:20px;
+}
+
+.modal.hidden{
+  display:none;
+}
+
+.modal-content{
   background:#fff;
+  border-radius:24px;
 
-  border-radius:20px;
+  padding:32px 28px;
 
-  overflow:hidden;
-
-  box-shadow:
-  0 6px 16px rgba(0,0,0,.08);
-}
-
-.log-title{
-
-  background:#d9d9d9;
-
-  padding:14px;
+  width:100%;
+  max-width:460px;
 
   text-align:center;
 
+  box-shadow:0 24px 60px rgba(0,0,0,.25);
+
+  position:relative;
+}
+
+.modal-content h2{
+  font-size:1.4rem;
   font-weight:700;
+  margin-bottom:10px;
 }
 
-.log-detail{
-
-  padding:16px;
-
-  text-align:center;
+.modal-content h1{
+  font-size:1.8rem;
+  font-weight:700;
+  margin-bottom:10px;
 }
 
-.log-footer{
-
-  background:#f4f4f4;
-
-  padding:12px;
-
-  text-align:center;
-
-  font-size:.85rem;
-
-  color:#666;
+.modal-content p{
+  color:#555;
+  margin-bottom:6px;
+  font-size:1rem;
 }
 
 /* =========================================
-   ADMIN MODE VISUAL
+   MODAL ACTIONS (button row)
+========================================= */
+
+.modal-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+.modal-actions button{
+  height:44px;
+  padding:0 22px;
+  border:none;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:.9rem;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.modal-actions button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+}
+
+/* button colors inside modals */
+#confirmYes,
+#confirmDeleteCamera,
+#confirmDeleteStaff,
+#staffConfirmYes,
+#saveStaffBtn,
+#saveCameraBtn,
+#genericConfirmYes{
+  background:#111;
+  color:#fff;
+}
+
+#confirmNo,
+#cancelCameraBtn,
+#cancelStaffBtn,
+#cancelDeleteCamera,
+#cancelDeleteStaff,
+#staffConfirmCancel,
+#genericConfirmNo{
+  background:#f0f0f0;
+  color:#333;
+}
+
+#takeHomeBtn{
+  background:#e8f0ff;
+  color:#1a52d9;
+}
+
+#staffRegenerate{
+  background:#fff4d9;
+  color:#8f6700;
+}
+
+/* =========================================
+   SCAN MODAL INPUT
+========================================= */
+
+.scan-modal{
+  max-width:360px;
+}
+
+#scanInput{
+  width:100%;
+  height:56px;
+  margin-top:18px;
+  border:2px solid #ddd;
+  border-radius:14px;
+  font-size:1.6rem;
+  text-align:center;
+  letter-spacing:6px;
+  outline:none;
+  transition:border-color .2s;
+}
+
+#scanInput:focus{
+  border-color:#000;
+}
+
+/* =========================================
+   CONFIRM IMAGE (checkout modal)
+========================================= */
+
+.confirm-image{
+  width:140px;
+  height:140px;
+  object-fit:cover;
+  border-radius:16px;
+  margin-bottom:14px;
+  background:#eee;
+}
+
+/* =========================================
+   CAMERA ADD/EDIT MODAL
+========================================= */
+
+.large-camera-modal{
+  max-width:520px;
+}
+
+.camera-preview-wrapper{
+  margin-bottom:18px;
+}
+
+.camera-preview-large{
+  width:100%;
+  max-height:260px;
+  object-fit:contain;
+  border-radius:16px;
+  background:#f2f2f2;
+}
+
+/* =========================================
+   FORM GROUPS (inside modals)
+========================================= */
+
+.form-group{
+  text-align:left;
+  margin-bottom:14px;
+}
+
+.form-group label{
+  display:block;
+  font-weight:600;
+  font-size:.85rem;
+  margin-bottom:6px;
+  color:#444;
+}
+
+.form-group input[type="text"]{
+  width:100%;
+  height:44px;
+  border:2px solid #e0e0e0;
+  border-radius:12px;
+  padding:0 14px;
+  font-size:.95rem;
+  outline:none;
+  transition:border-color .2s;
+}
+
+.form-group input[type="text"]:focus{
+  border-color:#000;
+}
+
+.checkbox-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.checkbox-row input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  cursor:pointer;
+}
+
+/* =========================================
+   IMAGE DROP ZONE
+========================================= */
+
+.square-image-button{
+  width:100%;
+  height:120px;
+  border:3px dashed #bbb;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  background:#f8f8f8;
+  color:#666;
+  font-weight:600;
+  font-size:.9rem;
+  transition:border-color .15s, background .15s;
+}
+
+.square-image-button:hover{
+  border-color:#000;
+  background:#efefef;
+}
+
+/* =========================================
+   ADMIN MODE GLOW
 ========================================= */
 
 body.admin-active .sidebar{
-  box-shadow:
-  0 0 30px rgba(40,120,255,.35);
+  box-shadow:0 0 30px rgba(40,120,255,.35);
 }
 
 body.admin-active .top-bar{
-  box-shadow:
-  0 0 18px rgba(40,120,255,.25);
+  box-shadow:0 0 18px rgba(40,120,255,.25);
 }
 
 /* =========================================
-   CARD ANIMATION
+   CARD ANIMATIONS
 ========================================= */
 
 .camera-card,
@@ -761,282 +814,34 @@ body.admin-active .top-bar{
 }
 
 @keyframes cardPop{
+  from{ opacity:0; transform:translateY(10px); }
+  to{   opacity:1; transform:translateY(0);    }
+}
 
-  from{
-    opacity:0;
-    transform:translateY(10px);
-  }
+.fade-in{
+  animation:fadeIn .2s ease;
+}
 
-  to{
-    opacity:1;
-    transform:translateY(0);
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{   opacity:1; transform:translateY(0);   }
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media(max-width:900px){
+  .camera-grid{
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
   }
 }
 
 /* =========================================
-   MOBILE
+   PHONE
 ========================================= */
 
 @media(max-width:600px){
-
-  .admin-camera-controls button{
-    font-size:.75rem;
-  }
-
-  .staff-controls button{
-    font-size:.75rem;
-  }
-
-  .toolbar{
-    flex-wrap:wrap;
-  }
-
-  .toolbar input,
-  .toolbar select{
-    min-width:120px;
-  }
-}
-
-/* ==========================================
-   STAFF CARDS
-========================================== */
-
-.staff-card {
-  background: #fff;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,.08);
-}
-
-.staff-name {
-  padding: 18px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.staff-id {
-  text-align: center;
-  padding-bottom: 14px;
-  color: #666;
-}
-
-.staff-controls {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ==========================================
-   STAFF EDIT MODAL
-========================================== */
-
-.staff-edit-content {
-  width: 500px;
-  max-width: 95vw;
-}
-
-.staff-edit-content input {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.staff-admin-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-/* ==========================================
-   DELETE CONFIRM MODAL
-========================================== */
-
-.delete-warning {
-  font-size: .95rem;
-  color: #666;
-  margin-top: 10px;
-  margin-bottom: 20px;
-}
-
-/* ==========================================
-   LARGE CAMERA EDIT VIEW
-========================================== */
-
-.camera-edit-preview {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 18px;
-  background: #f2f2f2;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin-bottom: 18px;
-}
-
-.camera-edit-fullscreen .modal-content {
-  width: min(1200px,95vw);
-  height: min(850px,90vh);
-
-  display: flex;
-  flex-direction: column;
-}
-
-.camera-edit-fullscreen .camera-edit-preview {
-  flex: 1;
-  min-height: 300px;
-}
-
-/* ==========================================
-   SQUARE IMAGE PICKER
-========================================== */
-
-.image-drop-zone {
-  width: 220px;
-  height: 220px;
-  margin: 0 auto 18px;
-
-  border: 3px dashed #bbb;
-  border-radius: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-  cursor: pointer;
-
-  background: #f8f8f8;
-  transition: .15s;
-}
-
-.image-drop-zone:hover {
-  border-color: #000;
-}
-
-.image-drop-zone img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-drop-zone p {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-}
-
-/* ==========================================
-   SPLIT CHECK IN / OUT BUTTON
-========================================== */
-
-.admin-split-button {
-  display: flex;
-  gap: 8px;
-}
-
-.admin-split-button button {
-  flex: 1;
-  height: 44px;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-/* left side */
-.admin-split-button .checkin-btn {
-  background: #e3f3ea;
-  color: #1f7a43;
-}
-
-/* right side */
-.admin-split-button .checkout-btn {
-  background: #e8f0fe;
-  color: #1a4fd8;
-}
-
-/* ==========================================
-   ADD STAFF BUTTON
-========================================== */
-
-.add-staff-card {
-  border: 3px dashed #bbb;
-  background: #f7f7f7;
-  border-radius: 18px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  transition: .15s;
-}
-
-.add-staff-card:hover {
-  border-color: #000;
-  background: #eee;
-}
-
-.add-staff-icon {
-  font-size: 60px;
-  color: #666;
-}
-
-/* ==========================================
-   ADMIN MODE GLOW
-========================================== */
-
-body.admin-active .sidebar {
-  box-shadow:
-    0 0 20px rgba(0,0,0,.2),
-    0 0 60px rgba(0,0,0,.12);
-}
-
-/* ==========================================
-   CONFIRM MODAL BUTTONS
-========================================== */
-
-.modal-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.modal-buttons button {
-  flex: 1;
-  height: 44px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-/* ==========================================
-   TABLET
-========================================== */
-
-@media (max-width: 900px){
-
-  .camera-grid{
-    grid-template-columns:
-      repeat(auto-fill,minmax(200px,1fr));
-  }
-
-  .camera-edit-fullscreen .modal-content{
-    width:95vw;
-    height:90vh;
-  }
-}
-
-/* ==========================================
-   PHONE
-========================================== */
-
-@media (max-width: 600px){
 
   .sidebar{
     width:80px;
@@ -1051,8 +856,7 @@ body.admin-active .sidebar {
   }
 
   .camera-grid{
-    grid-template-columns:
-      repeat(2,1fr);
+    grid-template-columns:repeat(2,1fr);
     gap:14px;
     padding:14px;
   }
@@ -1069,28 +873,17 @@ body.admin-active .sidebar {
     font-size:.75rem;
   }
 
-  .image-drop-zone{
-    width:180px;
-    height:180px;
+  .toolbar{
+    flex-wrap:wrap;
+  }
+
+  .toolbar input,
+  .toolbar select{
+    min-width:120px;
+  }
+
+  .modal-content{
+    padding:24px 18px;
   }
 }
-
-/* ==========================================
-   ANIMATIONS
-========================================== */
-
-.fade-in {
-  animation: fadeIn .2s ease;
-}
-
-@keyframes fadeIn {
-  from{
-    opacity:0;
-    transform:translateY(8px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
 }
