@@ -1,0 +1,1096 @@
+/* =========================================
+   GLOBAL RESET
+========================================= */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+html,
+body{
+  width:100%;
+  height:100%;
+}
+
+body{
+  background:#f3f4f6;
+  color:#111;
+  overflow-x:hidden;
+}
+
+/* =========================================
+   APP LAYOUT
+========================================= */
+
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+
+  width:96px;
+
+  background:#000;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:center;
+
+  z-index:100;
+}
+
+.sidebar-top{
+  padding-top:20px;
+}
+
+.sidebar-middle{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.sidebar-bottom{
+  padding-bottom:20px;
+}
+
+.sidebar-logo{
+  width:64px;
+  cursor:pointer;
+}
+
+#adminToggle{
+  width:64px;
+  cursor:pointer;
+}
+
+/* =========================================
+   ADMIN TABS
+========================================= */
+
+.admin-tabs{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.admin-tabs.hidden{
+  display:none;
+}
+
+.tab-button{
+  background:none;
+  border:none;
+  cursor:pointer;
+}
+
+.tab-button img{
+  width:64px;
+  display:block;
+}
+
+.tab-button:hover{
+  transform:scale(1.05);
+}
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main{
+  margin-left:96px;
+  width:calc(100% - 96px);
+
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.top-bar{
+  height:56px;
+  background:#000;
+
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+
+  padding:0 20px;
+
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+}
+
+.toolbar.hidden{
+  display:none;
+}
+
+.toolbar input,
+.toolbar select{
+  height:38px;
+  padding:0 12px;
+
+  border:none;
+  border-radius:999px;
+
+  background:#fff;
+
+  font-size:.9rem;
+}
+
+/* =========================================
+   CAMERA GRID
+========================================= */
+
+.camera-grid{
+  flex:1;
+
+  display:grid;
+
+  gap:20px;
+
+  padding:24px;
+  padding-bottom:80px;
+
+  justify-content:center;
+}
+
+/* FIXES FULLSCREEN HUGE CARDS */
+
+@media (orientation:landscape){
+
+  .camera-grid{
+    grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(260px,320px)
+    );
+  }
+
+}
+
+@media (orientation:portrait){
+
+  .camera-grid{
+    grid-template-columns:
+    repeat(
+      2,
+      minmax(140px,1fr)
+    );
+  }
+
+}
+
+/* =========================================
+   CAMERA CARD
+========================================= */
+
+.camera-card{
+
+  background:#fff;
+
+  border-radius:22px;
+
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  box-shadow:
+  0 8px 20px rgba(0,0,0,.08);
+
+  transition:
+  transform .15s ease,
+  box-shadow .15s ease;
+}
+
+.camera-card:hover{
+  transform:translateY(-3px);
+
+  box-shadow:
+  0 14px 30px rgba(0,0,0,.12);
+}
+
+/* =========================================
+   CAMERA IMAGE
+========================================= */
+
+.camera-image{
+  width:100%;
+
+  aspect-ratio:1/1;
+
+  background-size:cover;
+  background-position:center;
+
+  background-color:#e9e9e9;
+}
+
+/* =========================================
+   STATUS PILL
+========================================= */
+
+.camera-status{
+
+  margin:14px auto 10px;
+
+  padding:8px 18px;
+
+  border-radius:999px;
+
+  font-size:.9rem;
+  font-weight:600;
+
+  text-align:center;
+
+  max-width:90%;
+}
+
+.status-in{
+  background:#e6f6ec;
+  color:#13703a;
+}
+
+.status-out{
+  background:#fdeaea;
+  color:#a31c1c;
+}
+
+/* =========================================
+   CAMERA FOOTER
+========================================= */
+
+.camera-footer{
+
+  background:#d9d9d9;
+
+  padding:16px 10px;
+
+  text-align:center;
+
+  font-weight:700;
+
+  font-size:1rem;
+}
+
+/* =========================================
+   DISABLED CAMERA
+========================================= */
+
+.camera-card.disabled{
+  opacity:.45;
+}
+
+.camera-card.disabled .camera-footer{
+  background:#c2c2c2;
+}
+
+/* =========================================
+   ADD CAMERA CARD
+========================================= */
+
+.add-camera-card{
+
+  border:3px dashed #bfbfbf;
+
+  background:#f8f8f8;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+}
+
+.add-camera-card:hover{
+  border-color:#000;
+  background:#efefef;
+}
+
+.add-camera-image{
+
+  width:100%;
+  aspect-ratio:1/1;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:64px;
+  font-weight:300;
+
+  color:#666;
+}
+
+/* =========================================
+   BOTTOM BAR
+========================================= */
+
+.bottom-bar{
+
+  position:fixed;
+
+  left:96px;
+  right:0;
+  bottom:0;
+
+  height:46px;
+
+  background:#000;
+  color:#fff;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 18px;
+
+  box-shadow:
+  0 -2px 8px rgba(0,0,0,.15);
+
+  z-index:50;
+}
+
+.bottom-left{
+  display:flex;
+  gap:10px;
+}
+
+.bottom-right{
+  display:flex;
+  align-items:center;
+}
+
+.version{
+  font-size:.8rem;
+}
+
+.footer-button{
+
+  height:30px;
+
+  padding:0 12px;
+
+  border:none;
+  border-radius:999px;
+
+  cursor:pointer;
+
+  font-size:.8rem;
+  font-weight:600;
+}
+
+.footer-button.hidden{
+  display:none;
+}
+
+/* =========================================
+   ADMIN CAMERA CONTROLS
+========================================= */
+
+.admin-camera-controls{
+  padding:12px;
+
+  display:flex;
+  flex-direction:column;
+
+  gap:8px;
+}
+
+/* =========================================
+   SPLIT CHECK IN / CHECK OUT
+   (fills one button row)
+========================================= */
+
+.admin-split-buttons{
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:6px;
+}
+
+.admin-split-buttons button{
+  height:42px;
+
+  border:none;
+  border-radius:999px;
+
+  cursor:pointer;
+
+  font-weight:700;
+  font-size:.85rem;
+
+  transition:.15s ease;
+}
+
+/* =========================================
+   STANDARD ADMIN BUTTONS
+========================================= */
+
+.admin-camera-controls button{
+
+  height:42px;
+
+  border:none;
+  border-radius:999px;
+
+  cursor:pointer;
+
+  font-weight:700;
+  font-size:.85rem;
+
+  transition:
+  transform .15s ease,
+  box-shadow .15s ease,
+  filter .15s ease;
+}
+
+.admin-camera-controls button:hover{
+
+  transform:translateY(-2px);
+
+  box-shadow:
+  0 6px 16px rgba(0,0,0,.12);
+}
+
+/* =========================================
+   BUTTON COLORS
+========================================= */
+
+.admin-btn-in{
+  background:#e6f6ec;
+  color:#13703a;
+}
+
+.admin-btn-out{
+  background:#e8f0ff;
+  color:#1a52d9;
+}
+
+.admin-btn-edit{
+  background:#fff4d9;
+  color:#8f6700;
+}
+
+.admin-btn-delete{
+  background:#fdeaea;
+  color:#a31c1c;
+}
+
+.admin-btn-disable{
+  background:#ffe6e6;
+  color:#b51616;
+}
+
+.admin-btn-enable{
+  background:#ddf8e6;
+  color:#0d7a39;
+}
+
+.admin-btn-history{
+  background:#f0f0f0;
+  color:#444;
+}
+
+/* =========================================
+   ADD STAFF BUTTON
+========================================= */
+
+.add-staff-wrapper{
+  width:100%;
+}
+
+.add-staff-btn{
+
+  width:100%;
+  height:48px;
+
+  border:none;
+  border-radius:16px;
+
+  background:#000;
+  color:#fff;
+
+  font-weight:700;
+  font-size:.95rem;
+
+  cursor:pointer;
+
+  transition:.15s ease;
+}
+
+.add-staff-btn:hover{
+  transform:translateY(-2px);
+}
+
+/* =========================================
+   STAFF CARD
+========================================= */
+
+.staff-card{
+
+  background:#fff;
+
+  border-radius:22px;
+
+  overflow:hidden;
+
+  box-shadow:
+  0 8px 20px rgba(0,0,0,.08);
+
+  display:flex;
+  flex-direction:column;
+}
+
+.staff-name{
+
+  padding:18px;
+
+  text-align:center;
+
+  font-size:1rem;
+  font-weight:700;
+}
+
+.staff-id{
+
+  text-align:center;
+
+  padding-bottom:14px;
+
+  color:#666;
+
+  font-size:.9rem;
+}
+
+.staff-admin-badge{
+
+  margin:0 auto 14px;
+
+  padding:6px 14px;
+
+  border-radius:999px;
+
+  background:#e6f6ec;
+
+  color:#13703a;
+
+  font-weight:700;
+
+  font-size:.8rem;
+}
+
+/* =========================================
+   STAFF CONTROLS
+========================================= */
+
+.staff-controls{
+
+  padding:12px;
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(2,1fr);
+
+  gap:6px;
+}
+
+.staff-controls button{
+
+  height:38px;
+
+  border:none;
+  border-radius:999px;
+
+  cursor:pointer;
+
+  font-size:.8rem;
+  font-weight:700;
+}
+
+.staff-edit{
+  background:#fff4d9;
+  color:#8f6700;
+}
+
+.staff-delete{
+  background:#fdeaea;
+  color:#a31c1c;
+}
+
+.staff-admin{
+  background:#ddf8e6;
+  color:#0d7a39;
+}
+
+.staff-history{
+  background:#ececec;
+  color:#444;
+}
+
+/* =========================================
+   SEARCH TOOLBARS
+========================================= */
+
+#cameraToolbar,
+#logFilters,
+#staffToolbar{
+
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+#cameraToolbar.hidden,
+#logFilters.hidden,
+#staffToolbar.hidden{
+  display:none;
+}
+
+#cameraToolbar input,
+#cameraToolbar select,
+#logFilters input,
+#logFilters select,
+#staffToolbar input{
+
+  min-width:180px;
+
+  background:#fff;
+
+  border:none;
+
+  border-radius:999px;
+
+  padding:0 14px;
+
+  height:38px;
+}
+
+/* =========================================
+   LOG CARD
+========================================= */
+
+.log-card{
+
+  background:#fff;
+
+  border-radius:20px;
+
+  overflow:hidden;
+
+  box-shadow:
+  0 6px 16px rgba(0,0,0,.08);
+}
+
+.log-title{
+
+  background:#d9d9d9;
+
+  padding:14px;
+
+  text-align:center;
+
+  font-weight:700;
+}
+
+.log-detail{
+
+  padding:16px;
+
+  text-align:center;
+}
+
+.log-footer{
+
+  background:#f4f4f4;
+
+  padding:12px;
+
+  text-align:center;
+
+  font-size:.85rem;
+
+  color:#666;
+}
+
+/* =========================================
+   ADMIN MODE VISUAL
+========================================= */
+
+body.admin-active .sidebar{
+  box-shadow:
+  0 0 30px rgba(40,120,255,.35);
+}
+
+body.admin-active .top-bar{
+  box-shadow:
+  0 0 18px rgba(40,120,255,.25);
+}
+
+/* =========================================
+   CARD ANIMATION
+========================================= */
+
+.camera-card,
+.staff-card,
+.log-card{
+  animation:cardPop .22s ease;
+}
+
+@keyframes cardPop{
+
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:600px){
+
+  .admin-camera-controls button{
+    font-size:.75rem;
+  }
+
+  .staff-controls button{
+    font-size:.75rem;
+  }
+
+  .toolbar{
+    flex-wrap:wrap;
+  }
+
+  .toolbar input,
+  .toolbar select{
+    min-width:120px;
+  }
+}
+
+/* ==========================================
+   STAFF CARDS
+========================================== */
+
+.staff-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+.staff-name {
+  padding: 18px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.staff-id {
+  text-align: center;
+  padding-bottom: 14px;
+  color: #666;
+}
+
+.staff-controls {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==========================================
+   STAFF EDIT MODAL
+========================================== */
+
+.staff-edit-content {
+  width: 500px;
+  max-width: 95vw;
+}
+
+.staff-edit-content input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.staff-admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   DELETE CONFIRM MODAL
+========================================== */
+
+.delete-warning {
+  font-size: .95rem;
+  color: #666;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   LARGE CAMERA EDIT VIEW
+========================================== */
+
+.camera-edit-preview {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 18px;
+  background: #f2f2f2;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-bottom: 18px;
+}
+
+.camera-edit-fullscreen .modal-content {
+  width: min(1200px,95vw);
+  height: min(850px,90vh);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.camera-edit-fullscreen .camera-edit-preview {
+  flex: 1;
+  min-height: 300px;
+}
+
+/* ==========================================
+   SQUARE IMAGE PICKER
+========================================== */
+
+.image-drop-zone {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 18px;
+
+  border: 3px dashed #bbb;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  background: #f8f8f8;
+  transition: .15s;
+}
+
+.image-drop-zone:hover {
+  border-color: #000;
+}
+
+.image-drop-zone img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-drop-zone p {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* ==========================================
+   SPLIT CHECK IN / OUT BUTTON
+========================================== */
+
+.admin-split-button {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-split-button button {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* left side */
+.admin-split-button .checkin-btn {
+  background: #e3f3ea;
+  color: #1f7a43;
+}
+
+/* right side */
+.admin-split-button .checkout-btn {
+  background: #e8f0fe;
+  color: #1a4fd8;
+}
+
+/* ==========================================
+   ADD STAFF BUTTON
+========================================== */
+
+.add-staff-card {
+  border: 3px dashed #bbb;
+  background: #f7f7f7;
+  border-radius: 18px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: .15s;
+}
+
+.add-staff-card:hover {
+  border-color: #000;
+  background: #eee;
+}
+
+.add-staff-icon {
+  font-size: 60px;
+  color: #666;
+}
+
+/* ==========================================
+   ADMIN MODE GLOW
+========================================== */
+
+body.admin-active .sidebar {
+  box-shadow:
+    0 0 20px rgba(0,0,0,.2),
+    0 0 60px rgba(0,0,0,.12);
+}
+
+/* ==========================================
+   CONFIRM MODAL BUTTONS
+========================================== */
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 900px){
+
+  .camera-grid{
+    grid-template-columns:
+      repeat(auto-fill,minmax(200px,1fr));
+  }
+
+  .camera-edit-fullscreen .modal-content{
+    width:95vw;
+    height:90vh;
+  }
+}
+
+/* ==========================================
+   PHONE
+========================================== */
+
+@media (max-width: 600px){
+
+  .sidebar{
+    width:80px;
+  }
+
+  .main{
+    margin-left:80px;
+  }
+
+  .bottom-bar{
+    left:80px;
+  }
+
+  .camera-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+    gap:14px;
+    padding:14px;
+  }
+
+  .camera-footer{
+    font-size:.9rem;
+  }
+
+  .camera-status{
+    font-size:.8rem;
+  }
+
+  .admin-camera-controls button{
+    font-size:.75rem;
+  }
+
+  .image-drop-zone{
+    width:180px;
+    height:180px;
+  }
+}
+
+/* ==========================================
+   ANIMATIONS
+========================================== */
+
+.fade-in {
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}

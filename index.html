@@ -1,0 +1,559 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freedom Camera Checkout</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- =========================================
+     APP WRAPPER
+========================================= -->
+<div class="app">
+
+  <!-- =========================================
+       SIDEBAR
+  ========================================= -->
+  <aside class="sidebar">
+
+    <!-- LOGO -->
+    <div class="sidebar-top">
+      <img
+        id="freedomLogo"
+        class="sidebar-logo"
+        src="images/freedom_logo_on.png"
+        alt="Freedom Logo"
+      >
+    </div>
+
+    <!-- ADMIN TABS -->
+    <div class="sidebar-middle">
+
+      <div id="adminTabs" class="admin-tabs hidden">
+
+        <button class="tab-button active" id="cameraTabBtn">
+          <img
+            id="cameraTabIcon"
+            src="images/cameras_icon_on.png"
+            alt="Cameras"
+          >
+        </button>
+
+        <button class="tab-button" id="logsTabBtn">
+          <img
+            id="logsTabIcon"
+            src="images/logs_icon_off.png"
+            alt="Logs"
+          >
+        </button>
+
+        <button class="tab-button" id="staffTabBtn">
+          <img
+            id="staffTabIcon"
+            src="images/staff_icon_off.png"
+            alt="Staff"
+          >
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ADMIN LOGIN -->
+    <div class="sidebar-bottom">
+
+      <img
+        id="adminToggle"
+        src="images/admin_icon_off.png"
+        alt="Admin"
+      >
+
+    </div>
+
+  </aside>
+
+  <!-- =========================================
+       MAIN CONTENT
+  ========================================= -->
+  <main class="main">
+
+    <!-- =====================================
+         TOP BAR
+    ====================================== -->
+    <div class="top-bar">
+
+      <!-- CAMERA TOOLS -->
+      <div id="cameraToolbar" class="toolbar hidden">
+
+        <input
+          id="cameraSearchInput"
+          type="text"
+          placeholder="Search cameras..."
+        >
+
+        <select id="cameraSortSelect">
+          <option value="name">Sort by Name</option>
+          <option value="status">Sort by Status</option>
+        </select>
+
+      </div>
+
+      <!-- LOG TOOLS -->
+      <div id="logFilters" class="toolbar hidden">
+
+        <input
+          id="logSearchInput"
+          type="text"
+          placeholder="Search logs..."
+        >
+
+        <select id="logTypeFilter">
+          <option value="all">All Logs</option>
+          <option value="check in">Check In</option>
+          <option value="check out">Check Out</option>
+          <option value="admin">Admin</option>
+          <option value="staff">Staff</option>
+          <option value="camera">Camera</option>
+        </select>
+
+        <input
+          id="logDateFilter"
+          type="date"
+        >
+
+      </div>
+
+      <!-- STAFF TOOLS -->
+      <div id="staffToolbar" class="toolbar hidden">
+
+        <input
+          id="staffSearchInput"
+          type="text"
+          placeholder="Search staff..."
+        >
+
+      </div>
+
+    </div>
+
+    <!-- =====================================
+         CONTENT GRID
+    ====================================== -->
+    <div id="cameraGrid" class="camera-grid"></div>
+
+    <!-- =====================================
+         FOOTER
+    ====================================== -->
+    <div class="bottom-bar">
+
+      <div class="bottom-left">
+
+        <button
+          id="undoBtn"
+          class="footer-button hidden"
+        >
+          Undo
+        </button>
+
+        <button
+          id="exportDataBtn"
+          class="footer-button hidden"
+        >
+          Export
+        </button>
+
+        <button
+          id="restoreDefaultsBtn"
+          class="footer-button hidden"
+        >
+          Restore Defaults
+        </button>
+
+      </div>
+
+      <div class="bottom-right">
+        <span class="version">
+          v2.0.0
+        </span>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- =========================================
+     SCAN MODAL
+========================================= -->
+
+<div id="scanModal" class="modal hidden">
+
+  <div class="modal-content scan-modal">
+
+    <h1>Scan ID</h1>
+
+    <p id="scanCameraName"></p>
+
+    <input
+      id="scanInput"
+      type="text"
+      maxlength="6"
+      autocomplete="off"
+      autofocus
+    >
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     CONFIRM CHECKOUT MODAL
+========================================= -->
+
+<div id="confirmModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <img
+      id="confirmImage"
+      class="confirm-image"
+      src=""
+      alt=""
+    >
+
+    <h2 id="confirmCamera"></h2>
+
+    <p id="confirmUser"></p>
+
+    <div class="modal-actions">
+
+      <button id="confirmYes">
+        Confirm
+      </button>
+
+      <button id="takeHomeBtn">
+        Take Home
+      </button>
+
+      <button id="confirmNo">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+```
+```html
+<!-- =========================================
+     ERROR MODAL
+========================================= -->
+
+<div id="errorModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>Invalid ID</h2>
+
+    <p>
+      This ID is not recognized by the system.
+    </p>
+
+    <div class="modal-actions">
+      <button id="errorOk">
+        OK
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     CAMERA ADD / EDIT MODAL
+========================================= -->
+
+<div id="cameraModal" class="modal hidden">
+
+  <div class="modal-content large-camera-modal">
+
+    <h2 id="cameraModalTitle">
+      Add Camera
+    </h2>
+
+    <!-- LARGE CAMERA PREVIEW -->
+    <div class="camera-preview-wrapper">
+
+      <img
+        id="imagePreview"
+        class="camera-preview-large"
+        src="images/no_camera.png"
+        alt="Camera Preview"
+      >
+
+    </div>
+
+    <!-- CAMERA NAME -->
+    <div class="form-group">
+
+      <label>
+        Camera Name
+      </label>
+
+      <input
+        id="cameraNameInput"
+        type="text"
+        placeholder="Enter camera name"
+      >
+
+    </div>
+
+    <!-- IMAGE BUTTON -->
+    <div class="form-group">
+
+      <label>
+        Camera Image
+      </label>
+
+      <div id="imageDropZone" class="square-image-button">
+
+        <span>
+          Upload Image
+        </span>
+
+        <input
+          id="cameraFileInput"
+          type="file"
+          accept="image/*"
+          hidden
+        >
+
+      </div>
+
+    </div>
+
+    <!-- TAKE HOME OPTION -->
+    <div class="form-group">
+
+      <label class="checkbox-row">
+
+        <input
+          id="cameraTakeHome"
+          type="checkbox"
+        >
+
+        <span>
+          Allow Take Home
+        </span>
+
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button id="saveCameraBtn">
+        Save
+      </button>
+
+      <button id="cancelCameraBtn">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     DELETE CAMERA MODAL
+========================================= -->
+
+<div id="deleteCameraModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>
+      Delete Camera?
+    </h2>
+
+    <p>
+      This action cannot be undone.
+    </p>
+
+    <div class="modal-actions">
+
+      <button id="confirmDeleteCamera">
+        Delete
+      </button>
+
+      <button id="cancelDeleteCamera">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     DELETE STAFF MODAL
+========================================= -->
+
+<div id="deleteStaffModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>
+      Delete Staff Member?
+    </h2>
+
+    <p id="deleteStaffName">
+      Staff Name
+    </p>
+
+    <div class="modal-actions">
+
+      <button id="confirmDeleteStaff">
+        Delete
+      </button>
+
+      <button id="cancelDeleteStaff">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     STAFF EDIT MODAL
+========================================= -->
+
+<div id="staffEditModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2 id="staffModalTitle">
+      Add Staff Member
+    </h2>
+
+    <div class="form-group">
+
+      <label>
+        Full Name
+      </label>
+
+      <input
+        id="staffNameInput"
+        type="text"
+        placeholder="Enter staff name"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label class="checkbox-row">
+
+        <input
+          id="staffAdminToggle"
+          type="checkbox"
+        >
+
+        <span>
+          Administrator
+        </span>
+
+      </label>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button id="saveStaffBtn">
+        Save
+      </button>
+
+      <button id="cancelStaffBtn">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     STAFF CONFIRMATION MODAL
+========================================= -->
+
+<div id="staffConfirmModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>
+      Confirm Staff Member
+    </h2>
+
+    <p id="staffConfirmName">
+      Name
+    </p>
+
+    <p id="staffConfirmId">
+      ID
+    </p>
+
+    <div class="modal-actions">
+
+      <button id="staffRegenerate">
+        Generate New ID
+      </button>
+
+      <button id="staffConfirmYes">
+        Confirm
+      </button>
+
+      <button id="staffConfirmCancel">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     LOADING BAR
+========================================= -->
+
+<div id="loadingContainer" class="loading-container hidden">
+
+  <div
+    id="loadingBar"
+    class="loading-bar"
+  ></div>
+
+</div>
+
+<!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+<script src="app.js"></script>
+
+</body>
+</html>
+```
