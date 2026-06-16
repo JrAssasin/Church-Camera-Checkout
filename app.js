@@ -1,6 +1,6 @@
 /* ==================================================
    FREEDOM CAMERA CHECKOUT SYSTEM
-   app.js — v2.1.0
+   app.js — v2.2.0
 ================================================== */
 
 /* =========================
@@ -15,12 +15,12 @@ let activeTab          = "cameras";
 
 let editingCameraIndex  = null;
 let deletingCameraIndex = null;
+let denyingRequestIndex = null;   // camera index being denied
 
 let editingStaffId  = null;
 let deletingStaffId = null;
 
 let pendingStaffId     = null;
-let currentUploadImage = "";
 let cameraImageData    = "";
 
 /* =========================
@@ -39,12 +39,12 @@ const LS = {
 ========================= */
 
 const defaultCameras = [
-  { name:"Nikon D610",           status:"in", user:"Available", image:"images/cameras/nikon_d610.png",         disabled:false, takeHome:false },
-  { name:"Nikon Z6 II",          status:"in", user:"Available", image:"images/cameras/nikon_z6ii.png",          disabled:false, takeHome:false },
-  { name:"Nikon Z6 II Big Lens", status:"in", user:"Available", image:"images/cameras/nikon_z6ii_big_lens.png", disabled:false, takeHome:false },
-  { name:"Sony A7",              status:"in", user:"Available", image:"images/cameras/sony_a7.png",             disabled:false, takeHome:false },
-  { name:"Canon Backup",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false },
-  { name:"Spare Camera",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false }
+  { name:"Nikon D610",           status:"in", user:"Available", image:"images/cameras/nikon_d610.png",         disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Nikon Z6 II",          status:"in", user:"Available", image:"images/cameras/nikon_z6ii.png",          disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Nikon Z6 II Big Lens", status:"in", user:"Available", image:"images/cameras/nikon_z6ii_big_lens.png", disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Sony A7",              status:"in", user:"Available", image:"images/cameras/sony_a7.png",             disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Canon Backup",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Spare Camera",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true }
 ];
 
 const defaultUsers = {
@@ -73,8 +73,6 @@ const admins = [
   "Josh Wepking"
 ];
 
-// Special display titles — shown on staff cards and in logs
-// Add any name here to give them a custom role badge
 const roles = {
   "Josh Wepking" : "Lead Developer"
 };
@@ -86,13 +84,17 @@ const roles = {
 const cameras =
   JSON.parse(localStorage.getItem(LS.CAMERAS)) || structuredClone(defaultCameras);
 
+// Ensure all cameras have requestsAllowed field (for existing saved data)
+cameras.forEach(cam => {
+  if(cam.requestsAllowed === undefined) cam.requestsAllowed = true;
+});
+
 const users =
   JSON.parse(localStorage.getItem(LS.USERS)) || structuredClone(defaultUsers);
 
 let logs =
   JSON.parse(localStorage.getItem(LS.LOGS)) || [];
 
-// requests: array of { id, cameraIndex, cameraName, userName, time }
 let requests =
   JSON.parse(localStorage.getItem(LS.REQUESTS)) || [];
 
@@ -138,10 +140,6 @@ const cameraToolbar = document.getElementById("cameraToolbar");
 const logFilters    = document.getElementById("logFilters");
 const staffToolbar  = document.getElementById("staffToolbar");
 
-const undoBtn            = document.getElementById("undoBtn");
-const exportDataBtn      = document.getElementById("exportDataBtn");
-const restoreDefaultsBtn = document.getElementById("restoreDefaultsBtn");
-
 // scan modal
 const scanModal      = document.getElementById("scanModal");
 const scanInput      = document.getElementById("scanInput");
@@ -158,20 +156,33 @@ const confirmYes    = document.getElementById("confirmYes");
 const confirmNo     = document.getElementById("confirmNo");
 const takeHomeBtn   = document.getElementById("takeHomeBtn");
 
+// take-home reason modal (new)
+const takeHomeModal       = document.getElementById("takeHomeModal");
+const takeHomeReasonInput = document.getElementById("takeHomeReasonInput");
+const takeHomeSubmitBtn   = document.getElementById("takeHomeSubmitBtn");
+const takeHomeCancelBtn   = document.getElementById("takeHomeCancelBtn");
+
+// deny reason modal (new)
+const denyModal       = document.getElementById("denyModal");
+const denyReasonInput = document.getElementById("denyReasonInput");
+const denySubmitBtn   = document.getElementById("denySubmitBtn");
+const denyCancelBtn   = document.getElementById("denyCancelBtn");
+
 // error modal
 const errorModal = document.getElementById("errorModal");
 const errorOk    = document.getElementById("errorOk");
 
 // camera modal
-const cameraModal      = document.getElementById("cameraModal");
-const cameraModalTitle = document.getElementById("cameraModalTitle");
-const cameraNameInput  = document.getElementById("cameraNameInput");
-const cameraFileInput  = document.getElementById("cameraFileInput");
-const imagePreview     = document.getElementById("imagePreview");
-const imageDropZone    = document.getElementById("imageDropZone");
-const cameraTakeHome   = document.getElementById("cameraTakeHome");
-const saveCameraBtn    = document.getElementById("saveCameraBtn");
-const cancelCameraBtn  = document.getElementById("cancelCameraBtn");
+const cameraModal          = document.getElementById("cameraModal");
+const cameraModalTitle     = document.getElementById("cameraModalTitle");
+const cameraNameInput      = document.getElementById("cameraNameInput");
+const cameraFileInput      = document.getElementById("cameraFileInput");
+const imagePreview         = document.getElementById("imagePreview");
+const imageDropZone        = document.getElementById("imageDropZone");
+const cameraTakeHome       = document.getElementById("cameraTakeHome");
+const cameraAllowRequests  = document.getElementById("cameraAllowRequests");
+const saveCameraBtn        = document.getElementById("saveCameraBtn");
+const cancelCameraBtn      = document.getElementById("cancelCameraBtn");
 
 // delete camera modal
 const deleteCameraModal   = document.getElementById("deleteCameraModal");
@@ -219,16 +230,8 @@ function updateAdminGlow(){
 function showModal(el) { el.classList.remove("hidden"); }
 function hideModal(el) { el.classList.add("hidden");    }
 
-/* =========================
-   REQUEST HELPERS
-========================= */
-
 function getRequestForCamera(cameraIndex){
   return requests.find(r => r.cameraIndex === cameraIndex) || null;
-}
-
-function pendingRequestCount(){
-  return requests.length;
 }
 
 /* ==================================================
@@ -244,7 +247,7 @@ adminToggle.onclick = () => {
     adminTabs.classList.add("hidden");
     adminToggle.src = "images/ui/admin_icon_off.png";
 
-    // FIX: reset ALL tab icons to off on logout
+    // reset all tab icons to off
     tabIcons.forEach((icon, i) => {
       const names = ["cameras","logs","staff"];
       icon.src = `images/ui/${names[i]}_icon_off.png`;
@@ -252,11 +255,6 @@ adminToggle.onclick = () => {
 
     activeTab = "cameras";
     updateAdminGlow();
-
-    undoBtn.classList.add("hidden");
-    exportDataBtn.classList.add("hidden");
-    restoreDefaultsBtn.classList.add("hidden");
-
     render();
     return;
   }
@@ -271,13 +269,11 @@ adminToggle.onclick = () => {
 function setActiveTab(index, name){
   activeTab = name;
 
-  // reset all to off first
   tabIcons.forEach((icon, i) => {
     const names = ["cameras","logs","staff"];
     icon.src = `images/ui/${names[i]}_icon_off.png`;
   });
 
-  // activate selected
   const names = ["cameras","logs","staff"];
   tabIcons[index].src = `images/ui/${names[index]}_icon_on.png`;
 
@@ -305,13 +301,10 @@ function render(){
 }
 
 /* ==================================================
-   REQUEST NOTIFICATION BADGE
-   Shows in top-right corner when there are
-   pending take-home requests (admin only)
+   REQUEST NOTIFICATION BADGE (top-right, admin only)
 ================================================== */
 
 function renderRequestBadge(){
-
   let badge = document.getElementById("requestBadge");
 
   if(!isAdminMode || requests.length === 0){
@@ -323,30 +316,18 @@ function renderRequestBadge(){
     badge = document.createElement("div");
     badge.id = "requestBadge";
     badge.style.cssText = `
-      position: fixed;
-      top: 12px;
-      right: 16px;
-      z-index: 300;
-      background: #e63946;
-      color: #fff;
-      font-weight: 700;
-      font-size: .85rem;
-      border-radius: 999px;
-      padding: 6px 14px;
-      box-shadow: 0 4px 14px rgba(230,57,70,.4);
-      cursor: pointer;
-      animation: cardPop .2s ease;
+      position:fixed; top:12px; right:16px; z-index:300;
+      background:#e63946; color:#fff; font-weight:700;
+      font-size:.85rem; border-radius:999px; padding:6px 14px;
+      box-shadow:0 4px 14px rgba(230,57,70,.4);
+      cursor:pointer; animation:cardPop .2s ease;
     `;
-    badge.onclick = () => {
-      setActiveTab(0, "cameras");
-    };
+    badge.onclick = () => setActiveTab(0, "cameras");
     document.body.appendChild(badge);
   }
 
   const count = requests.length;
-  badge.textContent = count === 1
-    ? "1 Take-Home Request"
-    : `${count} Take-Home Requests`;
+  badge.textContent = count === 1 ? "1 Take-Home Request" : `${count} Take-Home Requests`;
 }
 
 /* ==================================================
@@ -354,7 +335,6 @@ function renderRequestBadge(){
 ================================================== */
 
 function renderCameras(){
-
   grid.innerHTML = "";
 
   const searchVal = (document.getElementById("cameraSearchInput")?.value || "").toLowerCase();
@@ -378,14 +358,12 @@ function renderCameras(){
     card.className = "camera-card fade-in";
     if(cam.disabled) card.classList.add("disabled");
 
-    // status label
     let statusLabel = cam.disabled
       ? "Disabled"
       : cam.status === "in"
         ? "Available"
         : "With " + cam.user + (cam.takeHome ? " • Take Home" : "");
 
-    // pending request indicator on card
     const requestBadgeHTML = req
       ? `<div class="camera-request-badge">📋 Take-Home Requested</div>`
       : "";
@@ -427,7 +405,6 @@ function renderCameras(){
         cam.status   = "in";
         cam.user     = "Available";
         cam.takeHome = false;
-        // clear any pending request for this camera
         requests = requests.filter(r => r.cameraIndex !== index);
         saveRequests();
         saveCameras();
@@ -446,12 +423,13 @@ function renderCameras(){
 
       split.append(checkIn, checkOut);
 
-      // if there's a pending request, show Accept / Deny instead of (or in addition to) normal controls
+      // pending request section
       if(req){
         const reqRow = document.createElement("div");
         reqRow.className = "request-row";
         reqRow.innerHTML = `
           <div class="request-label">📋 <strong>${req.userName}</strong> wants to take home</div>
+          ${req.reason ? `<div class="request-reason">"${req.reason}"</div>` : ""}
         `;
 
         const acceptBtn = document.createElement("button");
@@ -474,10 +452,7 @@ function renderCameras(){
         denyBtn.textContent = "✕ Deny Request";
         denyBtn.onclick = e => {
           e.stopPropagation();
-          requests = requests.filter(r => r.cameraIndex !== index);
-          saveRequests();
-          addLog("Denied Take Home", `${cam.name} — ${req.userName}`);
-          render();
+          openDenyModal(index);
         };
 
         controls.append(reqRow, acceptBtn, denyBtn, split);
@@ -519,6 +494,25 @@ function renderCameras(){
         }
       };
 
+      // block / allow take-home requests
+      const requestToggleBtn = document.createElement("button");
+      requestToggleBtn.className   = cam.requestsAllowed ? "admin-btn-history" : "admin-btn-enable";
+      requestToggleBtn.textContent = cam.requestsAllowed ? "🚫 Block Requests" : "✓ Allow Requests";
+      requestToggleBtn.onclick = e => {
+        e.stopPropagation();
+        cam.requestsAllowed = !cam.requestsAllowed;
+        // if blocking, also clear any pending request
+        if(!cam.requestsAllowed){
+          requests = requests.filter(r => r.cameraIndex !== index);
+          saveRequests();
+          addLog("Blocked Take-Home Requests", cam.name);
+        } else {
+          addLog("Allowed Take-Home Requests", cam.name);
+        }
+        saveCameras();
+        render();
+      };
+
       // delete
       const deleteBtn = document.createElement("button");
       deleteBtn.className   = "admin-btn-disable";
@@ -528,7 +522,7 @@ function renderCameras(){
         openDeleteCamera(index);
       };
 
-      controls.append(editBtn, disableBtn, deleteBtn);
+      controls.append(editBtn, disableBtn, requestToggleBtn, deleteBtn);
       card.appendChild(controls);
     }
 
@@ -550,16 +544,15 @@ function renderCameras(){
 
 document.getElementById("cameraSearchInput")
   ?.addEventListener("input", () => { if(activeTab === "cameras") renderCameras(); });
-
 document.getElementById("cameraSortSelect")
   ?.addEventListener("change", () => { if(activeTab === "cameras") renderCameras(); });
 
 /* ==================================================
    RENDER — LOGS
+   Export button lives in the log toolbar now
 ================================================== */
 
 function renderLogs(){
-
   grid.innerHTML = "";
 
   const search  = (document.getElementById("logSearchInput")?.value || "").toLowerCase();
@@ -601,12 +594,30 @@ document.getElementById("logTypeFilter")
 document.getElementById("logDateFilter")
   ?.addEventListener("change", () => { if(activeTab === "logs") renderLogs(); });
 
+// Export button — now inside log toolbar (wired here, button added to HTML)
+document.getElementById("exportLogsBtn")
+  ?.addEventListener("click", () => {
+    const rows = ["Time,Action,Detail,Admin"];
+    logs.forEach(l => {
+      const row = [l.time, l.action, l.detail, l.admin]
+        .map(v => `"${(v||"").replace(/"/g,'""')}"`)
+        .join(",");
+      rows.push(row);
+    });
+    const blob = new Blob([rows.join("\n")], { type:"text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = "camera_checkout_logs.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
 /* ==================================================
    RENDER — STAFF
 ================================================== */
 
 function renderStaff(){
-
   grid.innerHTML = "";
 
   const search = (document.getElementById("staffSearchInput")?.value || "").toLowerCase();
@@ -616,12 +627,9 @@ function renderStaff(){
     .sort((a, b) => a[1].localeCompare(b[1]));
 
   entries.forEach(([id, name]) => {
-
     const isAdminUser = admins.includes(name);
     const roleTitle   = roles[name] || null;
 
-    // badge: Lead Developer gets a special purple badge,
-    // other admins get the standard green Admin badge
     let badgeHTML = "";
     if(roleTitle){
       badgeHTML = `<div class="staff-admin-badge staff-role-badge">${roleTitle}</div>`;
@@ -643,7 +651,6 @@ function renderStaff(){
 
     card.querySelector(".staff-edit").onclick   = () => openStaffModal(id);
     card.querySelector(".staff-delete").onclick = () => openDeleteStaff(id, name);
-
     grid.appendChild(card);
   });
 
@@ -651,16 +658,9 @@ function renderStaff(){
   const addCard = document.createElement("div");
   addCard.className = "staff-card add-staff-card";
   addCard.style.cssText = `
-    border:3px dashed #bbb;
-    background:#f7f7f7;
-    border-radius:22px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    min-height:140px;
-    transition:.15s;
+    border:3px dashed #bbb; background:#f7f7f7; border-radius:22px;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; cursor:pointer; min-height:140px; transition:.15s;
   `;
   addCard.innerHTML = `
     <div style="font-size:48px;color:#aaa;line-height:1">+</div>
@@ -669,7 +669,6 @@ function renderStaff(){
   addCard.onmouseenter = () => { addCard.style.borderColor="#000"; addCard.style.background="#eee"; };
   addCard.onmouseleave = () => { addCard.style.borderColor="#bbb"; addCard.style.background="#f7f7f7"; };
   addCard.onclick = () => openStaffModal(null);
-
   grid.appendChild(addCard);
 }
 
@@ -794,28 +793,20 @@ cancelDeleteStaff.onclick = () => {
 
 /* ==================================================
    SCAN / ID ENTRY MODAL
-   — now says "Enter Your ID Code" not "Scan ID"
-   — cancel button added
 ================================================== */
 
 function openScanModal(context){
   scanCameraName.textContent = context === "Admin Login" ? "" : context;
-  scanTitle.textContent      = context === "Admin Login"
-    ? "Admin Login"
-    : "Enter Your ID Code";
+  scanTitle.textContent      = context === "Admin Login" ? "Admin Login" : "Enter Your ID Code";
   scanInput.value = "";
   showModal(scanModal);
   setTimeout(() => scanInput.focus(), 80);
 }
 
-// auto-submit at 6 digits
 scanInput.addEventListener("input", () => {
-  if(scanInput.value.length === 6){
-    handleScan(scanInput.value);
-  }
+  if(scanInput.value.length === 6) handleScan(scanInput.value);
 });
 
-// cancel button — close modal and reset
 scanCancelBtn.onclick = () => {
   hideModal(scanModal);
   activeCameraIndex = null;
@@ -823,15 +814,10 @@ scanCancelBtn.onclick = () => {
 };
 
 function handleScan(id){
-
   hideModal(scanModal);
 
   const name = users[id];
-
-  if(!name){
-    showModal(errorModal);
-    return;
-  }
+  if(!name){ showModal(errorModal); return; }
 
   scannedUser = name;
 
@@ -844,17 +830,12 @@ function handleScan(id){
       adminTabs.classList.remove("hidden");
       adminToggle.src = "images/ui/admin_icon_on.png";
 
-      // ensure cameras tab icon is on
       tabIcons.forEach((icon, i) => {
         const names = ["cameras","logs","staff"];
         icon.src = `images/ui/${names[i]}_icon_off.png`;
       });
       tabIcons[0].src = "images/ui/cameras_icon_on.png";
       activeTab = "cameras";
-
-      undoBtn.classList.remove("hidden");
-      exportDataBtn.classList.remove("hidden");
-      restoreDefaultsBtn.classList.remove("hidden");
 
       updateAdminGlow();
       addLog("Admin Login", name);
@@ -874,8 +855,9 @@ function handleScan(id){
     ? `Check out to ${name}?`
     : `Check in from ${cam.user}?`;
 
-  // only show Take Home when checking OUT
-  takeHomeBtn.style.display = cam.status === "in" ? "inline-block" : "none";
+  // show Take Home only when checking OUT and requests are allowed for this camera
+  const canRequest = cam.status === "in" && cam.requestsAllowed !== false;
+  takeHomeBtn.style.display = canRequest ? "inline-block" : "none";
 
   showModal(confirmModal);
 }
@@ -886,36 +868,10 @@ function handleScan(id){
 
 confirmYes.onclick = () => doCheckout(false);
 
-// Take Home → creates a PENDING REQUEST instead of instant checkout
 takeHomeBtn.onclick = () => {
-  const cam = cameras[activeCameraIndex];
-
-  // check if there's already a request for this camera
-  const existing = getRequestForCamera(activeCameraIndex);
-  if(existing){
-    // replace it
-    requests = requests.filter(r => r.cameraIndex !== activeCameraIndex);
-  }
-
-  requests.push({
-    id          : Date.now(),
-    cameraIndex : activeCameraIndex,
-    cameraName  : cam.name,
-    userName    : scannedUser,
-    time        : new Date().toLocaleString()
-  });
-
-  saveRequests();
-  addLog("Take-Home Requested", `${cam.name} — ${scannedUser}`);
-
+  // close checkout confirm, open reason modal
   hideModal(confirmModal);
-  activeCameraIndex = null;
-  scannedUser       = null;
-
-  render();
-
-  // show a brief confirmation toast
-  showToast(`Take-home request sent for ${cam.name}`);
+  openTakeHomeModal();
 };
 
 confirmNo.onclick = () => {
@@ -950,8 +906,96 @@ function doCheckout(takeHome){
 }
 
 /* ==================================================
+   TAKE-HOME REASON MODAL
+   Confirm button greyed until reason is typed
+================================================== */
+
+function openTakeHomeModal(){
+  takeHomeReasonInput.value    = "";
+  takeHomeSubmitBtn.disabled   = true;
+  takeHomeSubmitBtn.style.opacity = "0.4";
+  showModal(takeHomeModal);
+  takeHomeReasonInput.focus();
+}
+
+takeHomeReasonInput.addEventListener("input", () => {
+  const hasText = takeHomeReasonInput.value.trim().length > 0;
+  takeHomeSubmitBtn.disabled      = !hasText;
+  takeHomeSubmitBtn.style.opacity = hasText ? "1" : "0.4";
+});
+
+takeHomeSubmitBtn.onclick = () => {
+  const reason = takeHomeReasonInput.value.trim();
+  if(!reason) return;
+
+  const cam = cameras[activeCameraIndex];
+
+  // clear any existing request for this camera
+  requests = requests.filter(r => r.cameraIndex !== activeCameraIndex);
+
+  requests.push({
+    id          : Date.now(),
+    cameraIndex : activeCameraIndex,
+    cameraName  : cam.name,
+    userName    : scannedUser,
+    reason      : reason,
+    time        : new Date().toLocaleString()
+  });
+
+  saveRequests();
+  addLog("Take-Home Requested", `${cam.name} — ${scannedUser}: "${reason}"`);
+
+  hideModal(takeHomeModal);
+  activeCameraIndex = null;
+  scannedUser       = null;
+
+  render();
+  showToast(`Take-home request sent for ${cam.name}`);
+};
+
+takeHomeCancelBtn.onclick = () => {
+  hideModal(takeHomeModal);
+  // go back to checkout confirm
+  showModal(confirmModal);
+};
+
+/* ==================================================
+   DENY REASON MODAL
+   Reason is optional — Deny button always usable
+================================================== */
+
+function openDenyModal(cameraIndex){
+  denyingRequestIndex   = cameraIndex;
+  denyReasonInput.value = "";
+  showModal(denyModal);
+  denyReasonInput.focus();
+}
+
+denySubmitBtn.onclick = () => {
+  if(denyingRequestIndex === null) return;
+
+  const req    = getRequestForCamera(denyingRequestIndex);
+  const reason = denyReasonInput.value.trim();
+  const detail = reason
+    ? `${cameras[denyingRequestIndex].name} — ${req?.userName}: Reason: "${reason}"`
+    : `${cameras[denyingRequestIndex].name} — ${req?.userName}`;
+
+  requests = requests.filter(r => r.cameraIndex !== denyingRequestIndex);
+  saveRequests();
+  addLog("Denied Take Home", detail);
+
+  hideModal(denyModal);
+  denyingRequestIndex = null;
+  render();
+};
+
+denyCancelBtn.onclick = () => {
+  hideModal(denyModal);
+  denyingRequestIndex = null;
+};
+
+/* ==================================================
    TOAST NOTIFICATION
-   Brief message that fades out automatically
 ================================================== */
 
 function showToast(message){
@@ -960,30 +1004,17 @@ function showToast(message){
     toast = document.createElement("div");
     toast.id = "toastNotif";
     toast.style.cssText = `
-      position: fixed;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #111;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 999px;
-      font-weight: 600;
-      font-size: .9rem;
-      z-index: 400;
-      box-shadow: 0 6px 20px rgba(0,0,0,.25);
-      transition: opacity .4s ease;
+      position:fixed; bottom:60px; left:50%; transform:translateX(-50%);
+      background:#111; color:#fff; padding:12px 24px; border-radius:999px;
+      font-weight:600; font-size:.9rem; z-index:400;
+      box-shadow:0 6px 20px rgba(0,0,0,.25); transition:opacity .4s ease;
     `;
     document.body.appendChild(toast);
   }
-
-  toast.textContent = message;
+  toast.textContent   = message;
   toast.style.opacity = "1";
-
   clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => {
-    toast.style.opacity = "0";
-  }, 2800);
+  toast._timeout = setTimeout(() => { toast.style.opacity = "0"; }, 2800);
 }
 
 /* ==================================================
@@ -1001,17 +1032,19 @@ function openCameraModal(index){
   cameraImageData    = "";
 
   if(index === null){
-    cameraModalTitle.textContent = "Add Camera";
-    cameraNameInput.value        = "";
-    imagePreview.src             = "images/cameras/no_camera.png";
-    cameraTakeHome.checked       = false;
+    cameraModalTitle.textContent    = "Add Camera";
+    cameraNameInput.value           = "";
+    imagePreview.src                = "images/cameras/no_camera.png";
+    cameraTakeHome.checked          = false;
+    cameraAllowRequests.checked     = true;
   } else {
     const cam = cameras[index];
-    cameraModalTitle.textContent = "Edit Camera";
-    cameraNameInput.value        = cam.name;
-    imagePreview.src             = cam.image;
-    cameraImageData              = cam.image;
-    cameraTakeHome.checked       = !!cam.takeHome;
+    cameraModalTitle.textContent    = "Edit Camera";
+    cameraNameInput.value           = cam.name;
+    imagePreview.src                = cam.image;
+    cameraImageData                 = cam.image;
+    cameraTakeHome.checked          = !!cam.takeHome;
+    cameraAllowRequests.checked     = cam.requestsAllowed !== false;
   }
 
   showModal(cameraModal);
@@ -1045,18 +1078,25 @@ saveCameraBtn.onclick = () => {
   if(editingCameraIndex === null){
     cameras.push({
       name,
-      image    : cameraImageData || "images/cameras/no_camera.png",
-      status   : "in",
-      user     : "Available",
-      disabled : false,
-      takeHome : cameraTakeHome.checked
+      image           : cameraImageData || "images/cameras/no_camera.png",
+      status          : "in",
+      user            : "Available",
+      disabled        : false,
+      takeHome        : cameraTakeHome.checked,
+      requestsAllowed : cameraAllowRequests.checked
     });
     addLog("Added Camera", name);
   } else {
     const cam = cameras[editingCameraIndex];
-    cam.name     = name;
-    cam.takeHome = cameraTakeHome.checked;
+    cam.name            = name;
+    cam.takeHome        = cameraTakeHome.checked;
+    cam.requestsAllowed = cameraAllowRequests.checked;
     if(cameraImageData) cam.image = cameraImageData;
+    // if requests just got disabled, clear pending request
+    if(!cam.requestsAllowed){
+      requests = requests.filter(r => r.cameraIndex !== editingCameraIndex);
+      saveRequests();
+    }
     addLog("Edited Camera", name);
   }
 
@@ -1136,52 +1176,6 @@ function openGenericConfirm(title, message, callback){
   _genericConfirmCallback = callback;
   showModal(genericConfirmModal);
 }
-
-/* ==================================================
-   RESTORE DEFAULTS
-================================================== */
-
-restoreDefaultsBtn?.addEventListener("click", () => {
-  openGenericConfirm(
-    "Restore Defaults?",
-    "All cameras, users, and logs will be reset. This cannot be undone.",
-    () => {
-      cameras.length = 0;
-      cameras.push(...structuredClone(defaultCameras));
-      Object.keys(users).forEach(k => delete users[k]);
-      Object.assign(users, structuredClone(defaultUsers));
-      logs.length     = 0;
-      requests.length = 0;
-      saveCameras();
-      saveUsers();
-      saveLogs();
-      saveRequests();
-      addLog("System", "Restored defaults");
-      render();
-    }
-  );
-});
-
-/* ==================================================
-   EXPORT LOGS
-================================================== */
-
-exportDataBtn?.addEventListener("click", () => {
-  const rows = ["Time,Action,Detail,Admin"];
-  logs.forEach(l => {
-    const row = [l.time, l.action, l.detail, l.admin]
-      .map(v => `"${(v||"").replace(/"/g,'""')}"`)
-      .join(",");
-    rows.push(row);
-  });
-  const blob = new Blob([rows.join("\n")], { type:"text/csv" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = "camera_checkout_logs.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-});
 
 /* ==================================================
    SAVE ON UNLOAD
