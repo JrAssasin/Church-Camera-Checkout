@@ -886,4 +886,55 @@ body.admin-active .top-bar{
     padding:24px 18px;
   }
 }
+
+/* =========================================
+   TAKE-HOME REQUEST BADGE ON CAMERA CARD
+========================================= */
+
+.camera-request-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e63946;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(230,57,70,.4);
+  pointer-events: none;
+}
+
+/* camera-image needs position relative for the badge */
+.camera-image {
+  position: relative;
+}
+
+/* =========================================
+   REQUEST ROW (inside admin camera controls)
+========================================= */
+
+.request-row {
+  background: #fff4e0;
+  border: 2px solid #f4a800;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: .85rem;
+  color: #7a5000;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+/* =========================================
+   SCAN INPUT — numeric keypad friendly
+========================================= */
+
+#scanInput {
+  -moz-appearance: textfield;
+}
+
+#scanInput::-webkit-outer-spin-button,
+#scanInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
