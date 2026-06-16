@@ -130,6 +130,10 @@
           type="date"
         >
 
+        <button id="exportLogsBtn" class="toolbar-btn">
+          Export CSV
+        </button>
+
       </div>
 
       <!-- STAFF TOOLS -->
@@ -156,28 +160,6 @@
     <div class="bottom-bar">
 
       <div class="bottom-left">
-
-        <button
-          id="undoBtn"
-          class="footer-button hidden"
-        >
-          Undo
-        </button>
-
-        <button
-          id="exportDataBtn"
-          class="footer-button hidden"
-        >
-          Export
-        </button>
-
-        <button
-          id="restoreDefaultsBtn"
-          class="footer-button hidden"
-        >
-          Restore Defaults
-        </button>
-
       </div>
 
       <div class="bottom-right">
@@ -364,6 +346,25 @@
 
     </div>
 
+    <!-- ALLOW REQUESTS OPTION -->
+    <div class="form-group">
+
+      <label class="checkbox-row">
+
+        <input
+          id="cameraAllowRequests"
+          type="checkbox"
+          checked
+        >
+
+        <span>
+          Allow Take-Home Requests
+        </span>
+
+      </label>
+
+    </div>
+
     <div class="modal-actions">
 
       <button id="saveCameraBtn">
@@ -534,6 +535,78 @@
       </button>
 
       <button id="staffConfirmCancel">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     TAKE HOME REASON MODAL
+========================================= -->
+
+<div id="takeHomeModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>Take-Home Request</h2>
+
+    <p>Please explain where you are taking this camera and why.</p>
+
+    <div class="form-group" style="margin-top:16px">
+      <textarea
+        id="takeHomeReasonInput"
+        placeholder="e.g. School play rehearsal at the auditorium this weekend..."
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="modal-actions">
+
+      <button id="takeHomeSubmitBtn" disabled>
+        Submit Request
+      </button>
+
+      <button id="takeHomeCancelBtn">
+        Back
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     DENY REASON MODAL
+========================================= -->
+
+<div id="denyModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>Deny Request</h2>
+
+    <p>Optionally explain why this request is being denied.</p>
+
+    <div class="form-group" style="margin-top:16px">
+      <textarea
+        id="denyReasonInput"
+        placeholder="e.g. Camera is reserved for another event..."
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="modal-actions">
+
+      <button id="denySubmitBtn">
+        Deny Request
+      </button>
+
+      <button id="denyCancelBtn">
         Cancel
       </button>
 
