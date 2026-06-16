@@ -200,17 +200,21 @@
 
   <div class="modal-content scan-modal">
 
-    <h1>Scan ID</h1>
+    <h1 id="scanTitle">Enter Your ID Code</h1>
 
     <p id="scanCameraName"></p>
 
     <input
       id="scanInput"
-      type="text"
-      maxlength="6"
+      type="number"
+      inputmode="numeric"
+      placeholder="······"
       autocomplete="off"
-      autofocus
     >
+
+    <div class="modal-actions">
+      <button id="scanCancelBtn">Cancel</button>
+    </div>
 
   </div>
 
