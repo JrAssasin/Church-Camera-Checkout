@@ -947,3 +947,65 @@ body.admin-active .top-bar{
   background: #ede9fe;
   color: #5b21b6;
 }
+
+/* =========================================
+   TEXTAREA (reason inputs)
+========================================= */
+
+textarea {
+  width: 100%;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: .95rem;
+  font-family: Inter, system-ui, sans-serif;
+  resize: vertical;
+  outline: none;
+  transition: border-color .2s;
+  color: #111;
+}
+
+textarea:focus {
+  border-color: #000;
+}
+
+/* =========================================
+   REQUEST REASON (shown on admin card)
+========================================= */
+
+.request-reason {
+  font-size: .82rem;
+  color: #7a5000;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+/* =========================================
+   EXPORT BUTTON IN TOOLBAR
+========================================= */
+
+.toolbar-btn {
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: #e8e8e8;
+}
+
+/* =========================================
+   DISABLED SUBMIT BUTTON
+========================================= */
+
+button:disabled {
+  cursor: not-allowed;
+}
