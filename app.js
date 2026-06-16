@@ -63,15 +63,21 @@ const defaultUsers = {
   "592817":"Thomas Pasiecznik",
   "718593":"Zeke Panter",
   "936185":"Abby Dephouse",
-  "843809":"Josh Wepking — Lead Developer"
+  "843809":"Josh Wepking"
 };
 
 const admins = [
   "Cheyenne Wepking",
   "Izzy Wood",
   "Abby Dephouse",
-  "Josh Wepking — Lead Developer"
+  "Josh Wepking"
 ];
+
+// Special display titles — shown on staff cards and in logs
+// Add any name here to give them a custom role badge
+const roles = {
+  "Josh Wepking" : "Lead Developer"
+};
 
 /* =========================
    LOAD STORAGE
@@ -104,11 +110,17 @@ function saveRequests() { localStorage.setItem(LS.REQUESTS, JSON.stringify(reque
 ========================= */
 
 function addLog(action, detail){
+  const displayName = loggedInAdmin
+    ? (roles[loggedInAdmin]
+        ? `${loggedInAdmin} (${roles[loggedInAdmin]})`
+        : loggedInAdmin)
+    : "System";
+
   logs.unshift({
     time  : new Date().toLocaleString(),
     action,
     detail,
-    admin : loggedInAdmin || "System"
+    admin : displayName
   });
   saveLogs();
 }
@@ -606,13 +618,23 @@ function renderStaff(){
   entries.forEach(([id, name]) => {
 
     const isAdminUser = admins.includes(name);
+    const roleTitle   = roles[name] || null;
+
+    // badge: Lead Developer gets a special purple badge,
+    // other admins get the standard green Admin badge
+    let badgeHTML = "";
+    if(roleTitle){
+      badgeHTML = `<div class="staff-admin-badge staff-role-badge">${roleTitle}</div>`;
+    } else if(isAdminUser){
+      badgeHTML = `<div class="staff-admin-badge">Admin</div>`;
+    }
 
     const card = document.createElement("div");
     card.className = "staff-card fade-in";
     card.innerHTML = `
       <div class="staff-name">${name}</div>
       <div class="staff-id">${id}</div>
-      ${isAdminUser ? `<div class="staff-admin-badge">Admin</div>` : ""}
+      ${badgeHTML}
       <div class="staff-controls">
         <button class="staff-edit">Edit</button>
         <button class="staff-delete">Delete</button>
