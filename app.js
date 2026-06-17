@@ -100,10 +100,6 @@ const roles = {
 const cameras =
   JSON.parse(localStorage.getItem(LS.CAMERAS)) || structuredClone(defaultCameras);
 
-cameras.forEach(cam => {
-  if(cam.requestsAllowed === undefined) cam.requestsAllowed = true;
-});
-
 const users =
   JSON.parse(localStorage.getItem(LS.USERS)) || structuredClone(defaultUsers);
 
@@ -1327,9 +1323,47 @@ window.addEventListener("beforeunload", () => {
 });
 
 /* ==================================================
+   APP VERSION
+   Bump this number every time you push an update.
+   Also bump the ?v= numbers in index.html to match.
+================================================== */
+
+const APP_VERSION = "2.3.0";
+
+/* ==================================================
+   DATA MIGRATION
+   Runs on every boot. Safely adds any missing fields
+   to existing localStorage data so old saves never
+   crash the new code.
+================================================== */
+
+function migrateData(){
+
+  // stamp the saved version
+  const savedVersion = localStorage.getItem("cc_version");
+
+  // ensure every camera has all required fields
+  cameras.forEach(cam => {
+    if(cam.requestsAllowed === undefined) cam.requestsAllowed = true;
+    if(cam.takeHome       === undefined) cam.takeHome        = false;
+    if(cam.disabled       === undefined) cam.disabled        = false;
+    if(cam.sdCard         === undefined) cam.sdCard          = null;
+  });
+
+  saveCameras();
+
+  // if version changed, log it
+  if(savedVersion !== APP_VERSION){
+    localStorage.setItem("cc_version", APP_VERSION);
+    console.log(`App migrated from v${savedVersion || "unknown"} to v${APP_VERSION}`);
+  }
+}
+
+/* ==================================================
    BOOT
 ================================================== */
 
+migrateData();
 startClock();
 checkWeeklyReport();
 render();
