@@ -178,7 +178,7 @@ body{
 @media (orientation:landscape){
   .camera-grid{
     grid-template-columns:
-      repeat(auto-fill, minmax(260px, 320px));
+      repeat(3, 1fr);
   }
 }
 
@@ -833,7 +833,7 @@ body.admin-active .top-bar{
 
 @media(max-width:900px){
   .camera-grid{
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
