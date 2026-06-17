@@ -438,7 +438,7 @@ function renderCameras(){
   grid.innerHTML = "";
 
   const searchVal = (document.getElementById("cameraSearchInput")?.value || "").toLowerCase();
-  const sortVal   = document.getElementById("cameraSortSelect")?.value || "name";
+  const sortVal   = document.getElementById("cameraSortSelect")?.value || "custom";
 
   let list = cameras
     .map((cam, index) => ({ cam, index }))
@@ -449,12 +449,14 @@ function renderCameras(){
   } else if(sortVal === "status"){
     list.sort((a,b) => a.cam.status.localeCompare(b.cam.status));
   }
+  // "custom" — no sort, uses cameras array order which is the admin-defined order
 
   list.forEach(({ cam, index }) => {
     const req = getRequestForCamera(index);
 
     const card = document.createElement("div");
     card.className = "camera-card fade-in";
+    card.dataset.index = index;
     if(cam.disabled) card.classList.add("disabled");
 
     let statusLabel = cam.disabled
@@ -467,9 +469,17 @@ function renderCameras(){
       ? `<div class="camera-request-badge">📋 Take-Home Requested</div>`
       : "";
 
+    // drag handle — only shown in admin mode with custom sort
+    const dragHandleHTML = (isAdminMode && sortVal === "custom")
+      ? `<div class="drag-handle" title="Drag to reorder">
+           <span></span><span></span><span></span>
+         </div>`
+      : "";
+
     card.innerHTML = `
       <div class="camera-image" style="background-image:url('${cam.image}')">
         ${requestBadgeHTML}
+        ${dragHandleHTML}
       </div>
       <div class="camera-status ${cam.status === "in" ? "status-in" : "status-out"}">
         ${statusLabel}
@@ -486,6 +496,62 @@ function renderCameras(){
     }
 
     if(isAdminMode){
+
+      // drag and drop only when custom sort is active
+      if(sortVal === "custom"){
+        card.draggable = true;
+
+        card.addEventListener("dragstart", e => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", index.toString());
+          card.classList.add("dragging");
+        });
+
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          document.querySelectorAll(".camera-card").forEach(c => c.classList.remove("drag-over"));
+        });
+
+        card.addEventListener("dragover", e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          document.querySelectorAll(".camera-card").forEach(c => c.classList.remove("drag-over"));
+          card.classList.add("drag-over");
+        });
+
+        card.addEventListener("dragleave", () => {
+          card.classList.remove("drag-over");
+        });
+
+        card.addEventListener("drop", e => {
+          e.preventDefault();
+          card.classList.remove("drag-over");
+
+          const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+          const toIndex   = index;
+
+          if(fromIndex === toIndex) return;
+
+          // reorder cameras array
+          const moved = cameras.splice(fromIndex, 1)[0];
+          cameras.splice(toIndex, 0, moved);
+
+          // also reorder any requests that reference these indexes
+          requests.forEach(r => {
+            if(r.cameraIndex === fromIndex) r.cameraIndex = toIndex;
+            else if(fromIndex < toIndex && r.cameraIndex > fromIndex && r.cameraIndex <= toIndex){
+              r.cameraIndex--;
+            } else if(fromIndex > toIndex && r.cameraIndex >= toIndex && r.cameraIndex < fromIndex){
+              r.cameraIndex++;
+            }
+          });
+
+          saveCameras();
+          saveRequests();
+          renderCameras();
+        });
+      }
+
       const controls = document.createElement("div");
       controls.className = "admin-camera-controls";
 
@@ -1328,7 +1394,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.3.2";
+const APP_VERSION = "2.4.0";
 
 /* ==================================================
    DATA MIGRATION
