@@ -163,9 +163,8 @@
       </div>
 
       <div class="bottom-right">
-        <span class="version">
-          v2.0.0
-        </span>
+        <span id="liveClock" class="live-clock"></span>
+        <span class="version">v2.3.0</span>
       </div>
 
     </div>
@@ -195,6 +194,7 @@
     >
 
     <div class="modal-actions">
+      <button id="scanConfirmBtn" disabled>Confirm</button>
       <button id="scanCancelBtn">Cancel</button>
     </div>
 
@@ -538,6 +538,64 @@
         Cancel
       </button>
 
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     CHECK IN / OUT CHOICE MODAL
+========================================= -->
+
+<div id="choiceModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2 id="choiceTitle">What would you like to do?</h2>
+
+    <div class="modal-actions" style="flex-direction:column;gap:12px;margin-top:24px">
+
+      <button id="choiceCheckOut" class="choice-btn choice-out">
+        📤 Check Out
+      </button>
+
+      <button id="choiceCheckIn" class="choice-btn choice-in">
+        📥 Check In
+      </button>
+
+      <button id="choiceCancel">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     SD CARD SELECTION MODAL
+========================================= -->
+
+<div id="sdModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>Which SD Card?</h2>
+
+    <p>Select the SD card you are taking with this camera.</p>
+
+    <div class="sd-grid">
+      <button class="sd-btn" data-sd="SD Card 1">SD Card 1</button>
+      <button class="sd-btn" data-sd="SD Card 2">SD Card 2</button>
+      <button class="sd-btn" data-sd="SD Card 3">SD Card 3</button>
+      <button class="sd-btn" data-sd="SD Card 4">SD Card 4</button>
+      <button class="sd-btn" data-sd="SD Card 5">SD Card 5</button>
+    </div>
+
+    <div class="modal-actions">
+      <button id="sdCancelBtn">Back</button>
     </div>
 
   </div>
