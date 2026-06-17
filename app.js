@@ -1328,7 +1328,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.3.0";
+const APP_VERSION = "2.3.2";
 
 /* ==================================================
    DATA MIGRATION
@@ -1339,8 +1339,18 @@ const APP_VERSION = "2.3.0";
 
 function migrateData(){
 
-  // stamp the saved version
   const savedVersion = localStorage.getItem("cc_version");
+
+  // FIX: patch old corrupted name from previous version
+  // scan all users and fix "Josh Wepking — Lead Developer" -> "Josh Wepking"
+  let userFixed = false;
+  Object.keys(users).forEach(id => {
+    if(users[id] === "Josh Wepking — Lead Developer"){
+      users[id] = "Josh Wepking";
+      userFixed = true;
+    }
+  });
+  if(userFixed) saveUsers();
 
   // ensure every camera has all required fields
   cameras.forEach(cam => {
@@ -1352,7 +1362,6 @@ function migrateData(){
 
   saveCameras();
 
-  // if version changed, log it
   if(savedVersion !== APP_VERSION){
     localStorage.setItem("cc_version", APP_VERSION);
     console.log(`App migrated from v${savedVersion || "unknown"} to v${APP_VERSION}`);
