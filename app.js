@@ -1,7 +1,18 @@
 /* ==================================================
    FREEDOM CAMERA CHECKOUT SYSTEM
-   app.js — v2.2.0
+   app.js — v2.3.0
 ================================================== */
+
+/* =========================
+   EMAIL CONFIG
+   Change REPORT_EMAIL to update where weekly
+   reports are sent. No UI change needed.
+========================= */
+
+const EMAILJS_SERVICE  = "church_camera_checkout";
+const EMAILJS_TEMPLATE = "template_smvy5ke";
+const EMAILJS_KEY      = "sZhw_cHce5gUgLWRb";
+const REPORT_EMAIL     = "Cheyenne.westlake@gmail.com";
 
 /* =========================
    GLOBAL STATE
@@ -15,23 +26,28 @@ let activeTab          = "cameras";
 
 let editingCameraIndex  = null;
 let deletingCameraIndex = null;
-let denyingRequestIndex = null;   // camera index being denied
+let denyingRequestIndex = null;
 
 let editingStaffId  = null;
 let deletingStaffId = null;
 
-let pendingStaffId     = null;
-let cameraImageData    = "";
+let pendingStaffId  = null;
+let cameraImageData = "";
+
+// checkout flow state
+let checkoutAction = null;   // "in" or "out"
+let selectedSdCard = null;   // "SD Card 1" etc.
 
 /* =========================
    STORAGE KEYS
 ========================= */
 
 const LS = {
-  CAMERAS  : "cc_cameras",
-  USERS    : "cc_users",
-  LOGS     : "cc_logs",
-  REQUESTS : "cc_requests"
+  CAMERAS       : "cc_cameras",
+  USERS         : "cc_users",
+  LOGS          : "cc_logs",
+  REQUESTS      : "cc_requests",
+  LAST_REPORT   : "cc_last_report"
 };
 
 /* =========================
@@ -84,7 +100,6 @@ const roles = {
 const cameras =
   JSON.parse(localStorage.getItem(LS.CAMERAS)) || structuredClone(defaultCameras);
 
-// Ensure all cameras have requestsAllowed field (for existing saved data)
 cameras.forEach(cam => {
   if(cam.requestsAllowed === undefined) cam.requestsAllowed = true;
 });
@@ -145,7 +160,19 @@ const scanModal      = document.getElementById("scanModal");
 const scanInput      = document.getElementById("scanInput");
 const scanCameraName = document.getElementById("scanCameraName");
 const scanTitle      = document.getElementById("scanTitle");
+const scanConfirmBtn = document.getElementById("scanConfirmBtn");
 const scanCancelBtn  = document.getElementById("scanCancelBtn");
+
+// check in/out choice modal
+const choiceModal   = document.getElementById("choiceModal");
+const choiceTitle   = document.getElementById("choiceTitle");
+const choiceCheckIn = document.getElementById("choiceCheckIn");
+const choiceCheckOut= document.getElementById("choiceCheckOut");
+const choiceCancel  = document.getElementById("choiceCancel");
+
+// SD card modal
+const sdModal       = document.getElementById("sdModal");
+const sdCancelBtn   = document.getElementById("sdCancelBtn");
 
 // confirm checkout modal
 const confirmModal  = document.getElementById("confirmModal");
@@ -156,13 +183,13 @@ const confirmYes    = document.getElementById("confirmYes");
 const confirmNo     = document.getElementById("confirmNo");
 const takeHomeBtn   = document.getElementById("takeHomeBtn");
 
-// take-home reason modal (new)
+// take-home reason modal
 const takeHomeModal       = document.getElementById("takeHomeModal");
 const takeHomeReasonInput = document.getElementById("takeHomeReasonInput");
 const takeHomeSubmitBtn   = document.getElementById("takeHomeSubmitBtn");
 const takeHomeCancelBtn   = document.getElementById("takeHomeCancelBtn");
 
-// deny reason modal (new)
+// deny reason modal
 const denyModal       = document.getElementById("denyModal");
 const denyReasonInput = document.getElementById("denyReasonInput");
 const denySubmitBtn   = document.getElementById("denySubmitBtn");
@@ -173,23 +200,23 @@ const errorModal = document.getElementById("errorModal");
 const errorOk    = document.getElementById("errorOk");
 
 // camera modal
-const cameraModal          = document.getElementById("cameraModal");
-const cameraModalTitle     = document.getElementById("cameraModalTitle");
-const cameraNameInput      = document.getElementById("cameraNameInput");
-const cameraFileInput      = document.getElementById("cameraFileInput");
-const imagePreview         = document.getElementById("imagePreview");
-const imageDropZone        = document.getElementById("imageDropZone");
-const cameraTakeHome       = document.getElementById("cameraTakeHome");
-const cameraAllowRequests  = document.getElementById("cameraAllowRequests");
-const saveCameraBtn        = document.getElementById("saveCameraBtn");
-const cancelCameraBtn      = document.getElementById("cancelCameraBtn");
+const cameraModal         = document.getElementById("cameraModal");
+const cameraModalTitle    = document.getElementById("cameraModalTitle");
+const cameraNameInput     = document.getElementById("cameraNameInput");
+const cameraFileInput     = document.getElementById("cameraFileInput");
+const imagePreview        = document.getElementById("imagePreview");
+const imageDropZone       = document.getElementById("imageDropZone");
+const cameraTakeHome      = document.getElementById("cameraTakeHome");
+const cameraAllowRequests = document.getElementById("cameraAllowRequests");
+const saveCameraBtn       = document.getElementById("saveCameraBtn");
+const cancelCameraBtn     = document.getElementById("cancelCameraBtn");
 
 // delete camera modal
 const deleteCameraModal   = document.getElementById("deleteCameraModal");
 const confirmDeleteCamera = document.getElementById("confirmDeleteCamera");
 const cancelDeleteCamera  = document.getElementById("cancelDeleteCamera");
 
-// staff edit modal
+// staff modals
 const staffEditModal   = document.getElementById("staffEditModal");
 const staffModalTitle  = document.getElementById("staffModalTitle");
 const staffNameInput   = document.getElementById("staffNameInput");
@@ -197,13 +224,11 @@ const staffAdminToggle = document.getElementById("staffAdminToggle");
 const saveStaffBtn     = document.getElementById("saveStaffBtn");
 const cancelStaffBtn   = document.getElementById("cancelStaffBtn");
 
-// delete staff modal
 const deleteStaffModal   = document.getElementById("deleteStaffModal");
 const deleteStaffName    = document.getElementById("deleteStaffName");
 const confirmDeleteStaff = document.getElementById("confirmDeleteStaff");
 const cancelDeleteStaff  = document.getElementById("cancelDeleteStaff");
 
-// staff confirm modal
 const staffConfirmModal  = document.getElementById("staffConfirmModal");
 const staffConfirmName   = document.getElementById("staffConfirmName");
 const staffConfirmId     = document.getElementById("staffConfirmId");
@@ -235,11 +260,91 @@ function getRequestForCamera(cameraIndex){
 }
 
 /* ==================================================
+   LIVE CLOCK
+================================================== */
+
+function startClock(){
+  const clockEl = document.getElementById("liveClock");
+  if(!clockEl) return;
+
+  function tick(){
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString([], {
+      hour   : "2-digit",
+      minute : "2-digit",
+      second : "2-digit"
+    });
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ==================================================
+   WEEKLY EMAIL REPORT
+================================================== */
+
+function checkWeeklyReport(){
+  const lastSent = localStorage.getItem(LS.LAST_REPORT);
+  const now      = Date.now();
+  const oneWeek  = 7 * 24 * 60 * 60 * 1000;
+
+  // send if never sent before, or it's been 7+ days
+  if(!lastSent || (now - parseInt(lastSent)) >= oneWeek){
+    sendWeeklyReport();
+  }
+}
+
+function sendWeeklyReport(){
+  // gather last 7 days of logs
+  const oneWeek  = 7 * 24 * 60 * 60 * 1000;
+  const cutoff   = Date.now() - oneWeek;
+
+  const weekLogs = logs.filter(l => {
+    return new Date(l.time).getTime() >= cutoff;
+  });
+
+  if(weekLogs.length === 0){
+    // nothing to report — still update timestamp so we don't check every load
+    localStorage.setItem(LS.LAST_REPORT, Date.now().toString());
+    return;
+  }
+
+  const weekStr = new Date().toLocaleDateString([], {
+    weekday : "long",
+    year    : "numeric",
+    month   : "long",
+    day     : "numeric"
+  });
+
+  const logText = weekLogs.map(l =>
+    `[${l.time}] ${l.action} — ${l.detail} (${l.admin})`
+  ).join("\n");
+
+  // load EmailJS SDK dynamically
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+  script.onload = () => {
+    emailjs.init(EMAILJS_KEY);
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      to_email : REPORT_EMAIL,
+      week     : weekStr,
+      logs     : logText
+    }).then(() => {
+      localStorage.setItem(LS.LAST_REPORT, Date.now().toString());
+      console.log("Weekly report sent.");
+    }).catch(err => {
+      console.error("Email failed:", err);
+    });
+  };
+  document.head.appendChild(script);
+}
+
+/* ==================================================
    ADMIN TOGGLE
 ================================================== */
 
 adminToggle.onclick = () => {
-
   if(isAdminMode){
     isAdminMode   = false;
     loggedInAdmin = null;
@@ -247,7 +352,6 @@ adminToggle.onclick = () => {
     adminTabs.classList.add("hidden");
     adminToggle.src = "images/ui/admin_icon_off.png";
 
-    // reset all tab icons to off
     tabIcons.forEach((icon, i) => {
       const names = ["cameras","logs","staff"];
       icon.src = `images/ui/${names[i]}_icon_off.png`;
@@ -301,7 +405,7 @@ function render(){
 }
 
 /* ==================================================
-   REQUEST NOTIFICATION BADGE (top-right, admin only)
+   REQUEST BADGE
 ================================================== */
 
 function renderRequestBadge(){
@@ -351,7 +455,6 @@ function renderCameras(){
   }
 
   list.forEach(({ cam, index }) => {
-
     const req = getRequestForCamera(index);
 
     const card = document.createElement("div");
@@ -378,7 +481,6 @@ function renderCameras(){
       <div class="camera-footer">${cam.name}</div>
     `;
 
-    // student tap
     if(!isAdminMode){
       card.onclick = () => {
         if(cam.disabled) return;
@@ -387,13 +489,10 @@ function renderCameras(){
       };
     }
 
-    // admin controls
     if(isAdminMode){
-
       const controls = document.createElement("div");
       controls.className = "admin-camera-controls";
 
-      // check in / out row
       const split = document.createElement("div");
       split.className = "admin-split-button";
 
@@ -423,7 +522,6 @@ function renderCameras(){
 
       split.append(checkIn, checkOut);
 
-      // pending request section
       if(req){
         const reqRow = document.createElement("div");
         reqRow.className = "request-row";
@@ -460,16 +558,11 @@ function renderCameras(){
         controls.append(split);
       }
 
-      // edit
       const editBtn = document.createElement("button");
       editBtn.className   = "admin-btn-out";
       editBtn.textContent = "Edit Camera";
-      editBtn.onclick = e => {
-        e.stopPropagation();
-        openCameraModal(index);
-      };
+      editBtn.onclick = e => { e.stopPropagation(); openCameraModal(index); };
 
-      // disable / enable
       const disableBtn = document.createElement("button");
       disableBtn.className   = cam.disabled ? "admin-btn-enable" : "admin-btn-disable";
       disableBtn.textContent = cam.disabled ? "Enable Camera"    : "Disable Camera";
@@ -479,29 +572,19 @@ function renderCameras(){
           openGenericConfirm(
             `Disable "${cam.name}"?`,
             "The camera will be unavailable for checkout.",
-            () => {
-              cam.disabled = true;
-              saveCameras();
-              addLog("Disabled Camera", cam.name);
-              render();
-            }
+            () => { cam.disabled = true; saveCameras(); addLog("Disabled Camera", cam.name); render(); }
           );
         } else {
-          cam.disabled = false;
-          saveCameras();
-          addLog("Enabled Camera", cam.name);
-          render();
+          cam.disabled = false; saveCameras(); addLog("Enabled Camera", cam.name); render();
         }
       };
 
-      // block / allow take-home requests
       const requestToggleBtn = document.createElement("button");
       requestToggleBtn.className   = cam.requestsAllowed ? "admin-btn-history" : "admin-btn-enable";
-      requestToggleBtn.textContent = cam.requestsAllowed ? "🚫 Block Requests" : "✓ Allow Requests";
+      requestToggleBtn.textContent = cam.requestsAllowed ? "🚫 Block Requests"  : "✓ Allow Requests";
       requestToggleBtn.onclick = e => {
         e.stopPropagation();
         cam.requestsAllowed = !cam.requestsAllowed;
-        // if blocking, also clear any pending request
         if(!cam.requestsAllowed){
           requests = requests.filter(r => r.cameraIndex !== index);
           saveRequests();
@@ -513,14 +596,10 @@ function renderCameras(){
         render();
       };
 
-      // delete
       const deleteBtn = document.createElement("button");
       deleteBtn.className   = "admin-btn-disable";
       deleteBtn.textContent = "Delete Camera";
-      deleteBtn.onclick = e => {
-        e.stopPropagation();
-        openDeleteCamera(index);
-      };
+      deleteBtn.onclick = e => { e.stopPropagation(); openDeleteCamera(index); };
 
       controls.append(editBtn, disableBtn, requestToggleBtn, deleteBtn);
       card.appendChild(controls);
@@ -529,7 +608,6 @@ function renderCameras(){
     grid.appendChild(card);
   });
 
-  // add camera card
   if(isAdminMode){
     const addCard = document.createElement("div");
     addCard.className = "camera-card add-camera-card";
@@ -543,13 +621,12 @@ function renderCameras(){
 }
 
 document.getElementById("cameraSearchInput")
-  ?.addEventListener("input", () => { if(activeTab === "cameras") renderCameras(); });
+  ?.addEventListener("input",  () => { if(activeTab === "cameras") renderCameras(); });
 document.getElementById("cameraSortSelect")
   ?.addEventListener("change", () => { if(activeTab === "cameras") renderCameras(); });
 
 /* ==================================================
    RENDER — LOGS
-   Export button lives in the log toolbar now
 ================================================== */
 
 function renderLogs(){
@@ -594,7 +671,6 @@ document.getElementById("logTypeFilter")
 document.getElementById("logDateFilter")
   ?.addEventListener("change", () => { if(activeTab === "logs") renderLogs(); });
 
-// Export button — now inside log toolbar (wired here, button added to HTML)
 document.getElementById("exportLogsBtn")
   ?.addEventListener("click", () => {
     const rows = ["Time,Action,Detail,Admin"];
@@ -607,9 +683,7 @@ document.getElementById("exportLogsBtn")
     const blob = new Blob([rows.join("\n")], { type:"text/csv" });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
-    a.href     = url;
-    a.download = "camera_checkout_logs.csv";
-    a.click();
+    a.href = url; a.download = "camera_checkout_logs.csv"; a.click();
     URL.revokeObjectURL(url);
   });
 
@@ -654,7 +728,6 @@ function renderStaff(){
     grid.appendChild(card);
   });
 
-  // add staff card
   const addCard = document.createElement("div");
   addCard.className = "staff-card add-staff-card";
   addCard.style.cssText = `
@@ -681,7 +754,6 @@ document.getElementById("staffSearchInput")
 
 function openStaffModal(id){
   editingStaffId = id;
-
   if(id === null){
     staffModalTitle.textContent = "Add Staff Member";
     staffNameInput.value        = "";
@@ -692,7 +764,6 @@ function openStaffModal(id){
     staffNameInput.value        = name;
     staffAdminToggle.checked    = admins.includes(name);
   }
-
   showModal(staffEditModal);
   staffNameInput.focus();
 }
@@ -715,18 +786,10 @@ saveStaffBtn.onclick = () => {
   } else {
     const oldName = users[editingStaffId];
     users[editingStaffId] = name;
-
     const adminIdx = admins.indexOf(oldName);
-    if(isAdminChecked && adminIdx === -1){
-      admins.push(name);
-    } else if(!isAdminChecked && adminIdx !== -1){
-      admins.splice(adminIdx, 1);
-    }
-    if(oldName !== name){
-      const i = admins.indexOf(oldName);
-      if(i !== -1) admins[i] = name;
-    }
-
+    if(isAdminChecked && adminIdx === -1) admins.push(name);
+    else if(!isAdminChecked && adminIdx !== -1) admins.splice(adminIdx, 1);
+    if(oldName !== name){ const i = admins.indexOf(oldName); if(i !== -1) admins[i] = name; }
     saveUsers();
     addLog("Edited Staff", name);
     hideModal(staffEditModal);
@@ -736,10 +799,6 @@ saveStaffBtn.onclick = () => {
 
 cancelStaffBtn.onclick = () => hideModal(staffEditModal);
 
-/* ==================================================
-   STAFF CONFIRM MODAL
-================================================== */
-
 staffRegenerate.onclick = () => {
   pendingStaffId             = generateID();
   staffConfirmId.textContent = "ID: " + pendingStaffId;
@@ -748,10 +807,8 @@ staffRegenerate.onclick = () => {
 staffConfirmYes.onclick = () => {
   const name  = staffConfirmModal.dataset.name;
   const isAdm = staffConfirmModal.dataset.isAdmin === "true";
-
   users[pendingStaffId] = name;
   if(isAdm && !admins.includes(name)) admins.push(name);
-
   saveUsers();
   addLog("Added Staff", `${name} (ID: ${pendingStaffId})`);
   hideModal(staffConfirmModal);
@@ -792,25 +849,37 @@ cancelDeleteStaff.onclick = () => {
 };
 
 /* ==================================================
-   SCAN / ID ENTRY MODAL
+   ID ENTRY MODAL
+   — manual confirm button, no auto-submit
 ================================================== */
 
 function openScanModal(context){
   scanCameraName.textContent = context === "Admin Login" ? "" : context;
   scanTitle.textContent      = context === "Admin Login" ? "Admin Login" : "Enter Your ID Code";
-  scanInput.value = "";
+  scanInput.value            = "";
+  scanConfirmBtn.disabled       = true;
+  scanConfirmBtn.style.opacity  = "0.4";
   showModal(scanModal);
   setTimeout(() => scanInput.focus(), 80);
 }
 
+// enable confirm button only when 6 digits entered
 scanInput.addEventListener("input", () => {
-  if(scanInput.value.length === 6) handleScan(scanInput.value);
+  const ready = scanInput.value.length === 6;
+  scanConfirmBtn.disabled      = !ready;
+  scanConfirmBtn.style.opacity = ready ? "1" : "0.4";
 });
+
+// confirm button submits
+scanConfirmBtn.onclick = () => {
+  if(scanInput.value.length === 6) handleScan(scanInput.value);
+};
 
 scanCancelBtn.onclick = () => {
   hideModal(scanModal);
   activeCameraIndex = null;
   scannedUser       = null;
+  checkoutAction    = null;
 };
 
 function handleScan(id){
@@ -846,30 +915,109 @@ function handleScan(id){
     return;
   }
 
-  // camera checkout / checkin path
-  const cam = cameras[activeCameraIndex];
-
-  confirmImage.src          = cam.image;
-  confirmCamera.textContent = cam.name;
-  confirmUser.textContent   = cam.status === "in"
-    ? `Check out to ${name}?`
-    : `Check in from ${cam.user}?`;
-
-  // show Take Home only when checking OUT and requests are allowed for this camera
-  const canRequest = cam.status === "in" && cam.requestsAllowed !== false;
-  takeHomeBtn.style.display = canRequest ? "inline-block" : "none";
-
-  showModal(confirmModal);
+  // show check in / out choice screen
+  openChoiceModal(name);
 }
+
+/* ==================================================
+   CHECK IN / OUT CHOICE MODAL
+================================================== */
+
+function openChoiceModal(name){
+  const cam = cameras[activeCameraIndex];
+  choiceTitle.textContent = `${name} — ${cam.name}`;
+
+  // if camera is checked out, only show check in
+  // if camera is checked in, only show check out
+  // but show both so admin can override — for students
+  // we guide them based on camera state
+  if(cam.status === "out" && cam.user === name){
+    // their own camera — default to check in
+    choiceCheckIn.style.display  = "block";
+    choiceCheckOut.style.display = "none";
+  } else if(cam.status === "in"){
+    choiceCheckIn.style.display  = "none";
+    choiceCheckOut.style.display = "block";
+  } else {
+    // camera checked out by someone else — show both
+    choiceCheckIn.style.display  = "block";
+    choiceCheckOut.style.display = "block";
+  }
+
+  showModal(choiceModal);
+}
+
+choiceCheckIn.onclick = () => {
+  checkoutAction = "in";
+  hideModal(choiceModal);
+  showConfirmModal();
+};
+
+choiceCheckOut.onclick = () => {
+  checkoutAction = "out";
+  hideModal(choiceModal);
+  openSdModal();
+};
+
+choiceCancel.onclick = () => {
+  hideModal(choiceModal);
+  activeCameraIndex = null;
+  scannedUser       = null;
+  checkoutAction    = null;
+};
+
+/* ==================================================
+   SD CARD SELECTION MODAL
+================================================== */
+
+function openSdModal(){
+  selectedSdCard = null;
+
+  // wire up the SD card buttons dynamically
+  const sdButtons = document.querySelectorAll(".sd-btn");
+  sdButtons.forEach(btn => {
+    btn.onclick = () => {
+      selectedSdCard = btn.dataset.sd;
+      hideModal(sdModal);
+      showConfirmModal();
+    };
+  });
+
+  showModal(sdModal);
+}
+
+sdCancelBtn.onclick = () => {
+  hideModal(sdModal);
+  // go back to choice
+  openChoiceModal(scannedUser);
+};
 
 /* ==================================================
    CONFIRM CHECKOUT MODAL
 ================================================== */
 
+function showConfirmModal(){
+  const cam = cameras[activeCameraIndex];
+
+  confirmImage.src  = cam.image;
+  confirmCamera.textContent = cam.name;
+
+  if(checkoutAction === "out"){
+    confirmUser.textContent = `Check out to ${scannedUser}` +
+      (selectedSdCard ? ` with ${selectedSdCard}` : "");
+  } else {
+    confirmUser.textContent = `Check in from ${cam.user}`;
+  }
+
+  const canRequest = checkoutAction === "out" && cam.requestsAllowed !== false;
+  takeHomeBtn.style.display = canRequest ? "inline-block" : "none";
+
+  showModal(confirmModal);
+}
+
 confirmYes.onclick = () => doCheckout(false);
 
 takeHomeBtn.onclick = () => {
-  // close checkout confirm, open reason modal
   hideModal(confirmModal);
   openTakeHomeModal();
 };
@@ -878,41 +1026,46 @@ confirmNo.onclick = () => {
   hideModal(confirmModal);
   activeCameraIndex = null;
   scannedUser       = null;
+  checkoutAction    = null;
+  selectedSdCard    = null;
 };
 
 function doCheckout(takeHome){
   const cam = cameras[activeCameraIndex];
 
-  if(cam.status === "in"){
+  if(checkoutAction === "out"){
     cam.status   = "out";
     cam.user     = scannedUser;
     cam.takeHome = takeHome;
+    cam.sdCard   = selectedSdCard || null;
     addLog(
       takeHome ? "Check Out (Take Home)" : "Check Out",
-      `${cam.name} — ${scannedUser}`
+      `${cam.name} — ${scannedUser}` + (selectedSdCard ? ` [${selectedSdCard}]` : "")
     );
   } else {
     cam.status   = "in";
     cam.user     = "Available";
     cam.takeHome = false;
-    addLog("Check In", `${cam.name} — ${cam.user}`);
+    cam.sdCard   = null;
+    addLog("Check In", `${cam.name} — ${scannedUser}`);
   }
 
   saveCameras();
   hideModal(confirmModal);
   activeCameraIndex = null;
   scannedUser       = null;
+  checkoutAction    = null;
+  selectedSdCard    = null;
   render();
 }
 
 /* ==================================================
    TAKE-HOME REASON MODAL
-   Confirm button greyed until reason is typed
 ================================================== */
 
 function openTakeHomeModal(){
-  takeHomeReasonInput.value    = "";
-  takeHomeSubmitBtn.disabled   = true;
+  takeHomeReasonInput.value       = "";
+  takeHomeSubmitBtn.disabled      = true;
   takeHomeSubmitBtn.style.opacity = "0.4";
   showModal(takeHomeModal);
   takeHomeReasonInput.focus();
@@ -929,16 +1082,13 @@ takeHomeSubmitBtn.onclick = () => {
   if(!reason) return;
 
   const cam = cameras[activeCameraIndex];
-
-  // clear any existing request for this camera
   requests = requests.filter(r => r.cameraIndex !== activeCameraIndex);
-
   requests.push({
     id          : Date.now(),
     cameraIndex : activeCameraIndex,
     cameraName  : cam.name,
     userName    : scannedUser,
-    reason      : reason,
+    reason,
     time        : new Date().toLocaleString()
   });
 
@@ -948,6 +1098,8 @@ takeHomeSubmitBtn.onclick = () => {
   hideModal(takeHomeModal);
   activeCameraIndex = null;
   scannedUser       = null;
+  checkoutAction    = null;
+  selectedSdCard    = null;
 
   render();
   showToast(`Take-home request sent for ${cam.name}`);
@@ -955,13 +1107,11 @@ takeHomeSubmitBtn.onclick = () => {
 
 takeHomeCancelBtn.onclick = () => {
   hideModal(takeHomeModal);
-  // go back to checkout confirm
-  showModal(confirmModal);
+  showConfirmModal();
 };
 
 /* ==================================================
    DENY REASON MODAL
-   Reason is optional — Deny button always usable
 ================================================== */
 
 function openDenyModal(cameraIndex){
@@ -973,17 +1123,15 @@ function openDenyModal(cameraIndex){
 
 denySubmitBtn.onclick = () => {
   if(denyingRequestIndex === null) return;
-
   const req    = getRequestForCamera(denyingRequestIndex);
   const reason = denyReasonInput.value.trim();
   const detail = reason
-    ? `${cameras[denyingRequestIndex].name} — ${req?.userName}: Reason: "${reason}"`
+    ? `${cameras[denyingRequestIndex].name} — ${req?.userName}: "${reason}"`
     : `${cameras[denyingRequestIndex].name} — ${req?.userName}`;
 
   requests = requests.filter(r => r.cameraIndex !== denyingRequestIndex);
   saveRequests();
   addLog("Denied Take Home", detail);
-
   hideModal(denyModal);
   denyingRequestIndex = null;
   render();
@@ -995,7 +1143,7 @@ denyCancelBtn.onclick = () => {
 };
 
 /* ==================================================
-   TOAST NOTIFICATION
+   TOAST
 ================================================== */
 
 function showToast(message){
@@ -1024,7 +1172,7 @@ function showToast(message){
 errorOk.onclick = () => hideModal(errorModal);
 
 /* ==================================================
-   CAMERA ADD / EDIT MODAL
+   CAMERA MODAL
 ================================================== */
 
 function openCameraModal(index){
@@ -1032,19 +1180,19 @@ function openCameraModal(index){
   cameraImageData    = "";
 
   if(index === null){
-    cameraModalTitle.textContent    = "Add Camera";
-    cameraNameInput.value           = "";
-    imagePreview.src                = "images/cameras/no_camera.png";
-    cameraTakeHome.checked          = false;
-    cameraAllowRequests.checked     = true;
+    cameraModalTitle.textContent  = "Add Camera";
+    cameraNameInput.value         = "";
+    imagePreview.src              = "images/cameras/no_camera.png";
+    cameraTakeHome.checked        = false;
+    cameraAllowRequests.checked   = true;
   } else {
     const cam = cameras[index];
-    cameraModalTitle.textContent    = "Edit Camera";
-    cameraNameInput.value           = cam.name;
-    imagePreview.src                = cam.image;
-    cameraImageData                 = cam.image;
-    cameraTakeHome.checked          = !!cam.takeHome;
-    cameraAllowRequests.checked     = cam.requestsAllowed !== false;
+    cameraModalTitle.textContent  = "Edit Camera";
+    cameraNameInput.value         = cam.name;
+    imagePreview.src              = cam.image;
+    cameraImageData               = cam.image;
+    cameraTakeHome.checked        = !!cam.takeHome;
+    cameraAllowRequests.checked   = cam.requestsAllowed !== false;
   }
 
   showModal(cameraModal);
@@ -1062,10 +1210,7 @@ cameraFileInput?.addEventListener("change", e => {
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = evt => {
-    cameraImageData  = evt.target.result;
-    imagePreview.src = cameraImageData;
-  };
+  reader.onload = evt => { cameraImageData = evt.target.result; imagePreview.src = cameraImageData; };
   reader.readAsDataURL(file);
   e.target.value = "";
 });
@@ -1092,7 +1237,6 @@ saveCameraBtn.onclick = () => {
     cam.takeHome        = cameraTakeHome.checked;
     cam.requestsAllowed = cameraAllowRequests.checked;
     if(cameraImageData) cam.image = cameraImageData;
-    // if requests just got disabled, clear pending request
     if(!cam.requestsAllowed){
       requests = requests.filter(r => r.cameraIndex !== editingCameraIndex);
       saveRequests();
@@ -1108,7 +1252,7 @@ saveCameraBtn.onclick = () => {
 cancelCameraBtn.onclick = () => closeCameraModal();
 
 /* ==================================================
-   DELETE CAMERA MODAL
+   DELETE CAMERA
 ================================================== */
 
 function openDeleteCamera(index){
@@ -1123,8 +1267,7 @@ confirmDeleteCamera.onclick = () => {
   const name = cameras[deletingCameraIndex].name;
   cameras.splice(deletingCameraIndex, 1);
   requests = requests.filter(r => r.cameraIndex !== deletingCameraIndex);
-  saveCameras();
-  saveRequests();
+  saveCameras(); saveRequests();
   addLog("Deleted Camera", name);
   hideModal(deleteCameraModal);
   deletingCameraIndex = null;
@@ -1137,7 +1280,7 @@ cancelDeleteCamera.onclick = () => {
 };
 
 /* ==================================================
-   GENERIC CONFIRM DIALOG
+   GENERIC CONFIRM
 ================================================== */
 
 let _genericConfirmCallback = null;
@@ -1156,7 +1299,6 @@ const genericConfirmModal = (() => {
     </div>
   `;
   document.body.appendChild(el);
-
   el.querySelector("#genericConfirmYes").onclick = () => {
     hideModal(el);
     if(_genericConfirmCallback) _genericConfirmCallback();
@@ -1166,7 +1308,6 @@ const genericConfirmModal = (() => {
     hideModal(el);
     _genericConfirmCallback = null;
   };
-
   return el;
 })();
 
@@ -1182,14 +1323,13 @@ function openGenericConfirm(title, message, callback){
 ================================================== */
 
 window.addEventListener("beforeunload", () => {
-  saveCameras();
-  saveUsers();
-  saveLogs();
-  saveRequests();
+  saveCameras(); saveUsers(); saveLogs(); saveRequests();
 });
 
 /* ==================================================
    BOOT
 ================================================== */
 
+startClock();
+checkWeeklyReport();
 render();
