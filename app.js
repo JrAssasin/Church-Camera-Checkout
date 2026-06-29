@@ -1088,7 +1088,22 @@ function handleScan(id){
     return;
   }
 
-  // show check in / out choice screen
+  // admins skip the choice screen
+  // determine action from camera status — if camera is in, admin is checking out
+  // if camera is out, admin is checking in (they can do both regardless of who has it)
+  if(isAdminMode){
+    const cam = cameras[activeCameraIndex];
+    checkoutAction = cam.status === "in" ? "out" : "in";
+
+    if(checkoutAction === "out"){
+      openSdModal();     // checkout needs SD card + event
+    } else {
+      showConfirmModal(); // check in goes straight to confirm
+    }
+    return;
+  }
+
+  // students — show check in / out choice screen
   openChoiceModal(name);
 }
 
@@ -1099,6 +1114,9 @@ function handleScan(id){
 function openChoiceModal(name){
   const cam = cameras[activeCameraIndex];
   choiceTitle.textContent = `${name} — ${cam.name}`;
+
+  // admins bypass this entirely — this screen is students only
+  if(isAdminMode) return;
 
   if(cam.status === "out" && cam.user !== name){
     // camera is checked out by someone else — block student
@@ -1600,7 +1618,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.6.0";
+const APP_VERSION = "2.6.1";
 
 /* ==================================================
    DATA MIGRATION
