@@ -37,6 +37,7 @@ let cameraImageData = "";
 // checkout flow state
 let checkoutAction = null;   // "in" or "out"
 let selectedSdCard = null;   // "SD Card 1" etc.
+let selectedEvent  = null;   // "VBS", "Sunday Sing", etc.
 
 /* =========================
    STORAGE KEYS
@@ -47,7 +48,8 @@ const LS = {
   USERS         : "cc_users",
   LOGS          : "cc_logs",
   REQUESTS      : "cc_requests",
-  LAST_REPORT   : "cc_last_report"
+  LAST_REPORT   : "cc_last_report",
+  EVENTS        : "cc_events"
 };
 
 /* =========================
@@ -109,6 +111,16 @@ let logs =
 let requests =
   JSON.parse(localStorage.getItem(LS.REQUESTS)) || [];
 
+// events list — admins manage these, users pick from them
+let events =
+  JSON.parse(localStorage.getItem(LS.EVENTS)) || [
+    "VBS",
+    "Sunday Service",
+    "Sunday Sing",
+    "Youth Group",
+    "Special Event"
+  ];
+
 /* =========================
    SAVE HELPERS
 ========================= */
@@ -117,6 +129,7 @@ function saveCameras()  { localStorage.setItem(LS.CAMERAS,  JSON.stringify(camer
 function saveUsers()    { localStorage.setItem(LS.USERS,    JSON.stringify(users));    }
 function saveLogs()     { localStorage.setItem(LS.LOGS,     JSON.stringify(logs));     }
 function saveRequests() { localStorage.setItem(LS.REQUESTS, JSON.stringify(requests)); }
+function saveEvents()   { localStorage.setItem(LS.EVENTS,   JSON.stringify(events));   }
 
 /* =========================
    LOGGING
@@ -184,6 +197,13 @@ const takeHomeModal       = document.getElementById("takeHomeModal");
 const takeHomeReasonInput = document.getElementById("takeHomeReasonInput");
 const takeHomeSubmitBtn   = document.getElementById("takeHomeSubmitBtn");
 const takeHomeCancelBtn   = document.getElementById("takeHomeCancelBtn");
+
+// event modal
+const eventModal       = document.getElementById("eventModal");
+const eventSelect      = document.getElementById("eventSelect");
+const eventCustomInput = document.getElementById("eventCustomInput");
+const eventSubmitBtn   = document.getElementById("eventSubmitBtn");
+const eventCancelBtn   = document.getElementById("eventCancelBtn");
 
 // deny reason modal
 const denyModal       = document.getElementById("denyModal");
@@ -436,6 +456,83 @@ function renderRequestBadge(){
 
 function renderCameras(){
   grid.innerHTML = "";
+
+  // admin event manager panel at top
+  if(isAdminMode){
+    const panel = document.createElement("div");
+    panel.className = "event-manager-panel";
+    panel.style.cssText = `
+      grid-column: 1 / -1;
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      margin-bottom: 4px;
+    `;
+
+    panel.innerHTML = `
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:12px">📅 Manage Events</div>
+      <div id="eventTagList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="newEventInput" type="text" placeholder="Add new event..." style="
+          flex:1;height:38px;border:2px solid #e0e0e0;border-radius:999px;
+          padding:0 14px;font-size:.9rem;outline:none;
+        ">
+        <button id="addEventBtn" style="
+          height:38px;padding:0 18px;border:none;border-radius:999px;
+          background:#111;color:#fff;font-weight:700;cursor:pointer;
+        ">Add</button>
+      </div>
+    `;
+
+    grid.appendChild(panel);
+
+    // populate event tags
+    const tagList = panel.querySelector("#eventTagList");
+    events.forEach((ev, i) => {
+      const tag = document.createElement("div");
+      tag.style.cssText = `
+        display:flex;align-items:center;gap:6px;
+        background:#f0f0f0;border-radius:999px;
+        padding:5px 12px;font-size:.85rem;font-weight:600;
+      `;
+      tag.innerHTML = `
+        <span>${ev}</span>
+        <button data-i="${i}" style="
+          background:none;border:none;cursor:pointer;
+          font-size:1rem;color:#999;line-height:1;padding:0;
+        ">×</button>
+      `;
+      tag.querySelector("button").onclick = () => {
+        events.splice(i, 1);
+        saveEvents();
+        renderCameras();
+      };
+      tagList.appendChild(tag);
+    });
+
+    if(events.length === 0){
+      tagList.innerHTML = `<span style="color:#aaa;font-size:.85rem">No events yet — add one below</span>`;
+    }
+
+    // add event button
+    const addEventBtn   = panel.querySelector("#addEventBtn");
+    const newEventInput = panel.querySelector("#newEventInput");
+
+    const doAdd = () => {
+      const val = newEventInput.value.trim();
+      if(!val) return;
+      if(!events.includes(val)){
+        events.push(val);
+        saveEvents();
+      }
+      newEventInput.value = "";
+      renderCameras();
+    };
+
+    addEventBtn.onclick = doAdd;
+    newEventInput.addEventListener("keydown", e => { if(e.key === "Enter") doAdd(); });
+  }
 
   const searchVal = (document.getElementById("cameraSearchInput")?.value || "").toLowerCase();
   const sortVal   = document.getElementById("cameraSortSelect")?.value || "custom";
@@ -694,14 +791,28 @@ document.getElementById("cameraSortSelect")
 function renderLogs(){
   grid.innerHTML = "";
 
-  const search  = (document.getElementById("logSearchInput")?.value || "").toLowerCase();
-  const typeVal = document.getElementById("logTypeFilter")?.value   || "all";
-  const dateVal = document.getElementById("logDateFilter")?.value   || "";
+  const search    = (document.getElementById("logSearchInput")?.value  || "").toLowerCase();
+  const typeVal   = document.getElementById("logTypeFilter")?.value    || "all";
+  const dateVal   = document.getElementById("logDateFilter")?.value    || "";
+  const eventVal  = document.getElementById("logEventFilter")?.value   || "all";
+
+  // populate event filter dropdown with current events
+  const eventFilter = document.getElementById("logEventFilter");
+  if(eventFilter && eventFilter.dataset.populated !== "true"){
+    eventFilter.innerHTML = `<option value="all">All Events</option>`;
+    events.forEach(ev => {
+      const opt = document.createElement("option");
+      opt.value = ev; opt.textContent = ev;
+      eventFilter.appendChild(opt);
+    });
+    eventFilter.dataset.populated = "true";
+  }
 
   let list = logs.filter(log => {
     const matchSearch = (log.action + log.detail + log.admin).toLowerCase().includes(search);
     const matchType   = typeVal === "all" || log.action.toLowerCase().includes(typeVal);
-    return matchSearch && matchType;
+    const matchEvent  = eventVal === "all" || log.detail.toLowerCase().includes(eventVal.toLowerCase());
+    return matchSearch && matchType && matchEvent;
   });
 
   if(dateVal){
@@ -1041,7 +1152,7 @@ function openSdModal(){
     btn.onclick = () => {
       selectedSdCard = btn.dataset.sd;
       hideModal(sdModal);
-      showConfirmModal();
+      openEventModal();   // go to event selection next
     };
   });
 
@@ -1055,6 +1166,75 @@ sdCancelBtn.onclick = () => {
 };
 
 /* ==================================================
+   EVENT SELECTION MODAL
+   Opens after SD card selection
+   Admins can manage the list from the camera tab
+================================================== */
+
+function openEventModal(){
+  selectedEvent = null;
+
+  // populate the select dropdown with current events
+  eventSelect.innerHTML = `<option value="">-- Select an event --</option>`;
+  events.forEach(ev => {
+    const opt = document.createElement("option");
+    opt.value       = ev;
+    opt.textContent = ev;
+    eventSelect.appendChild(opt);
+  });
+
+  eventCustomInput.value  = "";
+  eventSubmitBtn.disabled = true;
+  eventSubmitBtn.style.opacity = "0.4";
+
+  showModal(eventModal);
+}
+
+// enable submit when either select has a value or custom input has text
+function updateEventSubmit(){
+  const hasSelection = eventSelect.value !== "";
+  const hasCustom    = eventCustomInput.value.trim().length > 0;
+  const ready        = hasSelection || hasCustom;
+  eventSubmitBtn.disabled      = !ready;
+  eventSubmitBtn.style.opacity = ready ? "1" : "0.4";
+}
+
+eventSelect.addEventListener("change", () => {
+  // if they pick from dropdown, clear custom input
+  if(eventSelect.value) eventCustomInput.value = "";
+  updateEventSubmit();
+});
+
+eventCustomInput.addEventListener("input", () => {
+  // if they type custom, clear dropdown
+  if(eventCustomInput.value.trim()) eventSelect.value = "";
+  updateEventSubmit();
+});
+
+eventSubmitBtn.onclick = () => {
+  const custom    = eventCustomInput.value.trim();
+  const fromList  = eventSelect.value;
+  selectedEvent   = custom || fromList;
+
+  if(!selectedEvent) return;
+
+  // if custom and not already in list, save it (Option B)
+  if(custom && !events.includes(custom)){
+    events.push(custom);
+    saveEvents();
+  }
+
+  hideModal(eventModal);
+  showConfirmModal();
+};
+
+eventCancelBtn.onclick = () => {
+  hideModal(eventModal);
+  // go back to SD card selection
+  openSdModal();
+};
+
+/* ==================================================
    CONFIRM CHECKOUT MODAL
 ================================================== */
 
@@ -1065,8 +1245,9 @@ function showConfirmModal(){
   confirmCamera.textContent = cam.name;
 
   if(checkoutAction === "out"){
-    confirmUser.textContent = `Check out to ${scannedUser}` +
-      (selectedSdCard ? ` with ${selectedSdCard}` : "");
+    const sdPart    = selectedSdCard ? ` • ${selectedSdCard}` : "";
+    const evPart    = selectedEvent  ? ` • ${selectedEvent}`  : "";
+    confirmUser.textContent = `Check out to ${scannedUser}${sdPart}${evPart}`;
   } else {
     confirmUser.textContent = `Check in from ${cam.user}`;
   }
@@ -1090,6 +1271,7 @@ confirmNo.onclick = () => {
   scannedUser       = null;
   checkoutAction    = null;
   selectedSdCard    = null;
+  selectedEvent     = null;
 };
 
 function doCheckout(takeHome){
@@ -1100,9 +1282,11 @@ function doCheckout(takeHome){
     cam.user     = scannedUser;
     cam.takeHome = takeHome;
     cam.sdCard   = selectedSdCard || null;
+    const sdLog  = selectedSdCard ? ` [${selectedSdCard}]` : "";
+    const evLog  = selectedEvent  ? ` [${selectedEvent}]`  : "";
     addLog(
       takeHome ? "Check Out (Take Home)" : "Check Out",
-      `${cam.name} — ${scannedUser}` + (selectedSdCard ? ` [${selectedSdCard}]` : "")
+      `${cam.name} — ${scannedUser}${sdLog}${evLog}`
     );
   } else {
     cam.status   = "in";
@@ -1118,6 +1302,7 @@ function doCheckout(takeHome){
   scannedUser       = null;
   checkoutAction    = null;
   selectedSdCard    = null;
+  selectedEvent     = null;
   render();
 }
 
@@ -1162,6 +1347,7 @@ takeHomeSubmitBtn.onclick = () => {
   scannedUser       = null;
   checkoutAction    = null;
   selectedSdCard    = null;
+  selectedEvent     = null;
 
   render();
   showToast(`Take-home request sent for ${cam.name}`);
@@ -1394,7 +1580,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.4.0";
+const APP_VERSION = "2.5.0";
 
 /* ==================================================
    DATA MIGRATION
