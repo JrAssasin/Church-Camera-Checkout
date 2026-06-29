@@ -1125,3 +1125,193 @@ button:disabled {
   outline-offset: 2px;
   transform: scale(1.02);
 }
+
+/* =========================================
+   RESPONSIVE SCALING SYSTEM
+   Uses clamp() so everything scales smoothly
+   between small phones and large monitors.
+   Nothing ever gets too big or too small.
+========================================= */
+
+/* sidebar scales with viewport */
+.sidebar {
+  width: clamp(72px, 8vw, 100px);
+}
+
+.sidebar-logo,
+#adminToggle {
+  width: clamp(44px, 5.5vw, 68px);
+}
+
+.tab-button img {
+  width: clamp(44px, 5.5vw, 68px);
+}
+
+/* main content offset matches sidebar */
+.main {
+  margin-left: clamp(72px, 8vw, 100px);
+  width: calc(100% - clamp(72px, 8vw, 100px));
+}
+
+.bottom-bar {
+  left: clamp(72px, 8vw, 100px);
+}
+
+/* top bar height */
+.top-bar {
+  height: clamp(48px, 6vh, 64px);
+}
+
+/* bottom bar height */
+.bottom-bar {
+  height: clamp(40px, 5vh, 52px);
+}
+
+/* camera grid padding and gap */
+.camera-grid {
+  gap: clamp(12px, 2vw, 24px);
+  padding: clamp(14px, 2.5vw, 28px);
+  padding-bottom: clamp(60px, 8vh, 90px);
+}
+
+/* camera card text */
+.camera-footer {
+  font-size: clamp(.75rem, 1.4vw, 1rem);
+  padding: clamp(10px, 1.5vw, 18px) clamp(8px, 1vw, 14px);
+}
+
+.camera-status {
+  font-size: clamp(.7rem, 1.2vw, .95rem);
+  padding: clamp(5px, .8vw, 10px) clamp(10px, 1.5vw, 20px);
+  margin: clamp(8px, 1.2vw, 16px) auto clamp(6px, 1vw, 12px);
+}
+
+/* modal content max width scales with viewport */
+.modal-content {
+  max-width: clamp(300px, 90vw, 480px);
+  padding: clamp(20px, 4vw, 36px) clamp(16px, 3.5vw, 30px);
+}
+
+.modal-content h1 {
+  font-size: clamp(1.2rem, 3vw, 1.9rem);
+}
+
+.modal-content h2 {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.modal-content p {
+  font-size: clamp(.8rem, 1.8vw, 1rem);
+}
+
+/* modal action buttons */
+.modal-actions button {
+  height: clamp(38px, 5vh, 50px);
+  font-size: clamp(.8rem, 1.5vw, .95rem);
+  padding: 0 clamp(14px, 2vw, 26px);
+}
+
+/* scan input */
+#scanInput {
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+  height: clamp(44px, 7vh, 62px);
+  letter-spacing: clamp(3px, 1vw, 8px);
+}
+
+/* admin camera control buttons */
+.admin-camera-controls button {
+  height: clamp(34px, 4.5vh, 46px);
+  font-size: clamp(.72rem, 1.2vw, .9rem);
+}
+
+.admin-split-button button {
+  height: clamp(34px, 4.5vh, 46px);
+  font-size: clamp(.72rem, 1.2vw, .9rem);
+}
+
+/* staff card text */
+.staff-name {
+  font-size: clamp(.85rem, 1.5vw, 1.05rem);
+  padding: clamp(12px, 1.8vw, 20px);
+}
+
+.staff-id {
+  font-size: clamp(.75rem, 1.2vw, .92rem);
+}
+
+.staff-controls button {
+  height: clamp(32px, 4vh, 42px);
+  font-size: clamp(.7rem, 1.1vw, .85rem);
+}
+
+/* log card text */
+.log-title {
+  font-size: clamp(.8rem, 1.4vw, 1rem);
+  padding: clamp(10px, 1.5vw, 16px);
+}
+
+.log-detail {
+  font-size: clamp(.78rem, 1.3vw, .95rem);
+  padding: clamp(10px, 1.5vw, 18px);
+}
+
+.log-footer {
+  font-size: clamp(.72rem, 1.1vw, .88rem);
+  padding: clamp(8px, 1.2vw, 14px);
+}
+
+/* toolbar inputs */
+.toolbar input,
+.toolbar select,
+#cameraToolbar input,
+#cameraToolbar select,
+#logFilters input,
+#logFilters select,
+#staffToolbar input {
+  height: clamp(32px, 4.5vh, 42px);
+  font-size: clamp(.78rem, 1.2vw, .92rem);
+  min-width: clamp(100px, 14vw, 200px);
+}
+
+/* version and clock text */
+.live-clock {
+  font-size: clamp(.75rem, 1.2vw, .95rem);
+}
+
+.version {
+  font-size: clamp(.68rem, 1vw, .85rem);
+}
+
+/* footer buttons */
+.footer-button {
+  height: clamp(26px, 3.5vh, 34px);
+  font-size: clamp(.72rem, 1.1vw, .85rem);
+}
+
+/* choice modal buttons */
+.choice-btn {
+  height: clamp(48px, 7vh, 62px);
+  font-size: clamp(.9rem, 1.8vw, 1.15rem);
+}
+
+/* SD card grid */
+.sd-btn {
+  height: clamp(44px, 6.5vh, 58px);
+  font-size: clamp(.78rem, 1.3vw, .95rem);
+}
+
+/* confirm image in checkout modal */
+.confirm-image {
+  width: clamp(90px, 15vw, 150px);
+  height: clamp(90px, 15vw, 150px);
+}
+
+/* camera preview in edit modal */
+.camera-preview-large {
+  max-height: clamp(160px, 25vh, 280px);
+}
+
+/* drag handle scales with card */
+.drag-handle span {
+  width: clamp(14px, 2vw, 20px);
+}
