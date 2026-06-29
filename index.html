@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="Camera Checkout">
   <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="images/icons/Freedom_Camera_Control.png">
-  <link rel="stylesheet" href="style.css?v=2.4.0">
+  <link rel="stylesheet" href="style.css?v=2.5.0">
 </head>
 <body>
 
@@ -130,6 +130,10 @@
           id="logDateFilter"
           type="date"
         >
+
+        <select id="logEventFilter">
+          <option value="all">All Events</option>
+        </select>
 
         <button id="exportLogsBtn" class="toolbar-btn">
           Export CSV
@@ -605,6 +609,49 @@
 </div>
 
 <!-- =========================================
+     EVENT SELECTION MODAL
+========================================= -->
+
+<div id="eventModal" class="modal hidden">
+
+  <div class="modal-content">
+
+    <h2>What are you shooting?</h2>
+
+    <p>Select an event or type a custom one below.</p>
+
+    <div class="form-group" style="margin-top:16px">
+      <label>Select Event</label>
+      <select id="eventSelect" style="
+        width:100%;height:44px;border:2px solid #e0e0e0;
+        border-radius:12px;padding:0 14px;font-size:.95rem;
+        outline:none;background:#fff;
+      ">
+        <option value="">-- Select an event --</option>
+      </select>
+    </div>
+
+    <div style="text-align:center;color:#aaa;font-size:.85rem;margin:8px 0">— or —</div>
+
+    <div class="form-group">
+      <label>Custom Event</label>
+      <input
+        id="eventCustomInput"
+        type="text"
+        placeholder="Type a custom event name..."
+      >
+    </div>
+
+    <div class="modal-actions">
+      <button id="eventSubmitBtn" disabled>Continue</button>
+      <button id="eventCancelBtn">Back</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================
      TAKE HOME REASON MODAL
 ========================================= -->
 
@@ -693,7 +740,7 @@
      JAVASCRIPT
 ========================================= -->
 
-<script src="app.js?v=2.4.0"></script>
+<script src="app.js?v=2.5.0"></script>
 
 </body>
 </html>
