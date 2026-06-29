@@ -1100,20 +1100,23 @@ function openChoiceModal(name){
   const cam = cameras[activeCameraIndex];
   choiceTitle.textContent = `${name} — ${cam.name}`;
 
-  // if camera is checked out, only show check in
-  // if camera is checked in, only show check out
-  // but show both so admin can override — for students
-  // we guide them based on camera state
+  if(cam.status === "out" && cam.user !== name){
+    // camera is checked out by someone else — block student
+    hideModal(choiceModal);
+    activeCameraIndex = null;
+    scannedUser       = null;
+    checkoutAction    = null;
+    showOwnershipError(cam.user);
+    return;
+  }
+
   if(cam.status === "out" && cam.user === name){
-    // their own camera — default to check in
+    // their own camera — show check in only
     choiceCheckIn.style.display  = "block";
     choiceCheckOut.style.display = "none";
-  } else if(cam.status === "in"){
-    choiceCheckIn.style.display  = "none";
-    choiceCheckOut.style.display = "block";
   } else {
-    // camera checked out by someone else — show both
-    choiceCheckIn.style.display  = "block";
+    // camera is available — show check out only
+    choiceCheckIn.style.display  = "none";
     choiceCheckOut.style.display = "block";
   }
 
@@ -1414,6 +1417,23 @@ function showToast(message){
 }
 
 /* ==================================================
+   OWNERSHIP ERROR MODAL
+   Shown when a student tries to check in/out
+   a camera that belongs to someone else
+================================================== */
+
+const ownershipModal  = document.getElementById("ownershipModal");
+const ownershipMsg    = document.getElementById("ownershipMsg");
+const ownershipOk     = document.getElementById("ownershipOk");
+
+function showOwnershipError(ownerName){
+  ownershipMsg.textContent = `This camera was checked out by ${ownerName}. Only an admin can check it in.`;
+  showModal(ownershipModal);
+}
+
+ownershipOk.onclick = () => hideModal(ownershipModal);
+
+/* ==================================================
    ERROR MODAL
 ================================================== */
 
@@ -1580,7 +1600,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.5.0";
+const APP_VERSION = "2.6.0";
 
 /* ==================================================
    DATA MIGRATION
