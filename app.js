@@ -62,7 +62,8 @@ const defaultCameras = [
   { name:"Nikon Z6 II Big Lens", status:"in", user:"Available", image:"images/cameras/nikon_z6ii_big_lens.png", disabled:false, takeHome:false, requestsAllowed:true },
   { name:"Sony A7",              status:"in", user:"Available", image:"images/cameras/sony_a7.png",             disabled:false, takeHome:false, requestsAllowed:true },
   { name:"Canon Backup",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true },
-  { name:"Spare Camera",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true }
+  { name:"Spare Camera",         status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true },
+  { name:"Personal Camera",       status:"in", user:"Available", image:"images/cameras/no_camera.png",           disabled:false, takeHome:false, requestsAllowed:true }
 ];
 
 const defaultUsers = {
@@ -927,15 +928,25 @@ document.getElementById("staffSearchInput")
 
 function openStaffModal(id){
   editingStaffId = id;
+
+  const idRow = document.getElementById("staffIdRow");
+  const idInput = document.getElementById("staffIdInput");
+
   if(id === null){
+    // Adding new — show ID field, pre-fill with generated ID but allow editing
     staffModalTitle.textContent = "Add Staff Member";
     staffNameInput.value        = "";
     staffAdminToggle.checked    = false;
+    if(idRow)  idRow.style.display  = "block";
+    if(idInput) idInput.value = generateID();
   } else {
+    // Editing — hide ID field entirely, ID is locked
     const name = users[id];
     staffModalTitle.textContent = "Edit Staff Member";
     staffNameInput.value        = name;
     staffAdminToggle.checked    = admins.includes(name);
+    if(idRow)  idRow.style.display  = "none";
+    if(idInput) idInput.value = id;
   }
   showModal(staffEditModal);
   staffNameInput.focus();
@@ -949,7 +960,24 @@ saveStaffBtn.onclick = () => {
   const isAdminChecked = staffAdminToggle.checked;
 
   if(editingStaffId === null){
-    pendingStaffId = generateID();
+    const idInput = document.getElementById("staffIdInput");
+    const typedId = (idInput?.value || "").trim();
+
+    // validate ID — must be exactly 6 digits and not already taken
+    if(!/^\d{6}$/.test(typedId)){
+      idInput.style.outline = "2px solid red";
+      idInput.focus();
+      return;
+    }
+    if(users[typedId]){
+      idInput.style.outline = "2px solid red";
+      idInput.title = "This ID is already in use";
+      idInput.focus();
+      return;
+    }
+    idInput.style.outline = "";
+
+    pendingStaffId = typedId;
     staffConfirmName.textContent      = name;
     staffConfirmId.textContent        = "ID: " + pendingStaffId;
     staffConfirmModal.dataset.name    = name;
@@ -972,10 +1000,7 @@ saveStaffBtn.onclick = () => {
 
 cancelStaffBtn.onclick = () => hideModal(staffEditModal);
 
-staffRegenerate.onclick = () => {
-  pendingStaffId             = generateID();
-  staffConfirmId.textContent = "ID: " + pendingStaffId;
-};
+// staffRegenerate removed — ID is now typed in the add form directly
 
 staffConfirmYes.onclick = () => {
   const name  = staffConfirmModal.dataset.name;
@@ -1618,7 +1643,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.6.1";
+const APP_VERSION = "2.6.2";
 
 /* ==================================================
    DATA MIGRATION
