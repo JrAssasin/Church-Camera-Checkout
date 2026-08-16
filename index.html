@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="Camera Checkout">
   <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="images/icons/Freedom_Camera_Control.png">
-  <link rel="stylesheet" href="style.css?v=2.6.2">
+  <link rel="stylesheet" href="style.css?v=2.6.3">
 </head>
 <body>
 
@@ -489,13 +489,24 @@
         Staff ID <span style="color:#aaa;font-weight:400;font-size:.8rem">(6 digits)</span>
       </label>
 
-      <input
-        id="staffIdInput"
-        type="number"
-        inputmode="numeric"
-        placeholder="Enter 6-digit ID"
-        maxlength="6"
-      >
+      <div style="display:flex;gap:8px;align-items:center">
+
+        <input
+          id="staffIdInput"
+          type="number"
+          inputmode="numeric"
+          placeholder="Enter 6-digit ID"
+          maxlength="6"
+          style="flex:1"
+        >
+
+        <button type="button" id="staffIdRandomBtn" style="
+          height:44px;padding:0 14px;border:none;border-radius:12px;
+          background:#f0f0f0;color:#333;font-size:1.1rem;
+          cursor:pointer;flex-shrink:0;transition:.15s;
+        " title="Generate random ID">🔀</button>
+
+      </div>
 
     </div>
 
@@ -773,7 +784,7 @@
      JAVASCRIPT
 ========================================= -->
 
-<script src="app.js?v=2.6.2"></script>
+<script src="app.js?v=2.6.3"></script>
 
 </body>
 </html>
