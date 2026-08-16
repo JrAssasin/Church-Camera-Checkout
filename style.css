@@ -163,8 +163,6 @@ body{
 ========================================= */
 
 .camera-grid{
-  flex:1;
-
   display:grid;
 
   gap:20px;
@@ -173,6 +171,7 @@ body{
   padding-bottom:80px;
 
   justify-content:center;
+  align-content:start;     /* rows only as tall as their content */
 }
 
 @media (orientation:landscape){
