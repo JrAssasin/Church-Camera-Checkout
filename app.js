@@ -1002,6 +1002,15 @@ cancelStaffBtn.onclick = () => hideModal(staffEditModal);
 
 // staffRegenerate removed — ID is now typed in the add form directly
 
+// randomize button inside the add staff modal
+document.getElementById("staffIdRandomBtn")?.addEventListener("click", () => {
+  const idInput = document.getElementById("staffIdInput");
+  if(idInput){
+    idInput.value         = generateID();
+    idInput.style.outline = "";
+  }
+});
+
 staffConfirmYes.onclick = () => {
   const name  = staffConfirmModal.dataset.name;
   const isAdm = staffConfirmModal.dataset.isAdmin === "true";
@@ -1643,7 +1652,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.6.2";
+const APP_VERSION = "2.6.3";
 
 /* ==================================================
    DATA MIGRATION
