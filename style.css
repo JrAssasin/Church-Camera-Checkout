@@ -1152,18 +1152,19 @@ button:disabled {
   width: calc(100% - clamp(72px, 8vw, 100px));
 }
 
-.bottom-bar {
-  left: clamp(72px, 8vw, 100px);
-}
-
 /* top bar height */
 .top-bar {
   height: clamp(48px, 6vh, 64px);
 }
 
-/* bottom bar height */
+/* bottom bar — always fixed to bottom of screen */
 .bottom-bar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: clamp(72px, 8vw, 100px);
+  right: 0;
   height: clamp(40px, 5vh, 52px);
+  z-index: 50;
 }
 
 /* camera grid padding and gap */
