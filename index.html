@@ -14,14 +14,26 @@
   <meta name="apple-mobile-web-app-title" content="Camera Checkout">
   <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="images/icons/Freedom_Camera_Control.png">
-  <link rel="stylesheet" href="style.css?v=2.6.3">
+  <link rel="stylesheet" href="style.css?v=2.7.0">
 </head>
 <body>
 
 <!-- =========================================
+     SPLASH SCREEN
+========================================= -->
+
+<div id="splashScreen">
+  <img id="splashLogo" src="images/ui/freedom_logo_on.png" alt="Freedom">
+  <div id="splashTitle">CAMERA CHECKOUT</div>
+  <div id="splashDots">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- =========================================
      APP WRAPPER
 ========================================= -->
-<div class="app">
+<div class="app app-hidden">
 
   <!-- =========================================
        SIDEBAR
@@ -787,7 +799,7 @@
      JAVASCRIPT
 ========================================= -->
 
-<script src="app.js?v=2.6.3"></script>
+<script src="app.js?v=2.7.0"></script>
 
 </body>
 </html>
