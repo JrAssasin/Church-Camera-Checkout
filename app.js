@@ -277,6 +277,89 @@ function getRequestForCamera(cameraIndex){
 }
 
 /* ==================================================
+   SPLASH SCREEN
+================================================== */
+
+function runSplash(){
+  const splash = document.getElementById("splashScreen");
+  const app    = document.querySelector(".app");
+
+  if(!splash || !app) return;
+
+  // after 1.6s start exit
+  setTimeout(() => {
+    splash.classList.add("splash-out");
+
+    // reveal app underneath
+    app.classList.add("app-visible");
+
+    // remove splash from DOM after animation
+    setTimeout(() => {
+      splash.remove();
+    }, 600);
+  }, 1600);
+}
+
+/* ==================================================
+   MODAL ANIMATION HELPERS
+================================================== */
+
+function showModalAnimated(el){
+  el.classList.remove("hidden");
+  // force reflow so animation triggers
+  void el.querySelector(".modal-content")?.offsetWidth;
+}
+
+function hideModalAnimated(el, callback){
+  const content = el.querySelector(".modal-content");
+  if(!content){ hideModal(el); if(callback) callback(); return; }
+
+  content.classList.add("modal-closing");
+  setTimeout(() => {
+    content.classList.remove("modal-closing");
+    el.classList.add("hidden");
+    if(callback) callback();
+  }, 180);
+}
+
+/* ==================================================
+   ADMIN LOGIN PULSE
+================================================== */
+
+function triggerAdminPulse(){
+  const sidebar = document.querySelector(".sidebar");
+  if(!sidebar) return;
+  sidebar.classList.remove("admin-pulse");
+  void sidebar.offsetWidth;
+  sidebar.classList.add("admin-pulse");
+  setTimeout(() => sidebar.classList.remove("admin-pulse"), 700);
+}
+
+/* ==================================================
+   TAB ICON BOUNCE
+================================================== */
+
+function bounceTabIcon(index){
+  const icon = tabIcons[index];
+  if(!icon) return;
+  icon.classList.remove("tab-icon-bounce");
+  void icon.offsetWidth;
+  icon.classList.add("tab-icon-bounce");
+  setTimeout(() => icon.classList.remove("tab-icon-bounce"), 350);
+}
+
+/* ==================================================
+   ADMIN TOGGLE SPIN
+================================================== */
+
+function spinAdminIcon(){
+  adminToggle.classList.remove("admin-spin");
+  void adminToggle.offsetWidth;
+  adminToggle.classList.add("admin-spin");
+  setTimeout(() => adminToggle.classList.remove("admin-spin"), 450);
+}
+
+/* ==================================================
    LIVE CLOCK
 ================================================== */
 
@@ -368,6 +451,7 @@ adminToggle.onclick = () => {
 
     adminTabs.classList.add("hidden");
     adminToggle.src = "images/ui/admin_icon_off.png";
+    spinAdminIcon();
 
     tabIcons.forEach((icon, i) => {
       const names = ["cameras","logs","staff"];
@@ -398,6 +482,7 @@ function setActiveTab(index, name){
   const names = ["cameras","logs","staff"];
   tabIcons[index].src = `images/ui/${names[index]}_icon_on.png`;
 
+  bounceTabIcon(index);
   render();
 }
 
@@ -1114,6 +1199,7 @@ function handleScan(id){
       activeTab = "cameras";
 
       updateAdminGlow();
+      triggerAdminPulse();
       addLog("Admin Login", name);
       render();
     } else {
@@ -1462,10 +1548,13 @@ function showToast(message){
     `;
     document.body.appendChild(toast);
   }
-  toast.textContent   = message;
+  toast.textContent = message;
+  toast.classList.remove("toast-hidden");
   toast.style.opacity = "1";
   clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => { toast.style.opacity = "0"; }, 2800);
+  toast._timeout = setTimeout(() => {
+    toast.classList.add("toast-hidden");
+  }, 2800);
 }
 
 /* ==================================================
@@ -1652,7 +1741,7 @@ window.addEventListener("beforeunload", () => {
    Also bump the ?v= numbers in index.html to match.
 ================================================== */
 
-const APP_VERSION = "2.6.3";
+const APP_VERSION = "2.7.0";
 
 /* ==================================================
    DATA MIGRATION
@@ -1699,4 +1788,5 @@ function migrateData(){
 migrateData();
 startClock();
 checkWeeklyReport();
+runSplash();
 render();
