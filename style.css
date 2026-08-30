@@ -1314,3 +1314,290 @@ button:disabled {
 .drag-handle span {
   width: clamp(14px, 2vw, 20px);
 }
+
+/* =========================================
+   OPENING SPLASH SCREEN
+========================================= */
+
+#splashScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  pointer-events: none;
+}
+
+#splashLogo {
+  width: clamp(80px, 18vw, 160px);
+  opacity: 0;
+  animation: splashLogoIn 0.7s cubic-bezier(.22,1,.36,1) 0.2s forwards;
+}
+
+#splashTitle {
+  color: #fff;
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  opacity: 0;
+  animation: splashLogoIn 0.6s cubic-bezier(.22,1,.36,1) 0.55s forwards;
+}
+
+#splashDots {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  animation: splashLogoIn 0.4s ease 0.9s forwards;
+}
+
+#splashDots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: dotPulse 0.8s ease-in-out infinite;
+}
+
+#splashDots span:nth-child(2) { animation-delay: 0.15s; }
+#splashDots span:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes splashLogoIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: .3; transform: scale(.8); }
+  50%       { opacity: 1;  transform: scale(1.2); }
+}
+
+/* splash exit */
+#splashScreen.splash-out {
+  animation: splashExit 0.6s cubic-bezier(.4,0,1,1) forwards;
+}
+
+@keyframes splashExit {
+  0%   { opacity: 1; transform: scale(1);    }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+
+/* app content hidden until splash exits */
+.app-hidden {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
+}
+
+.app-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================
+   MODAL ANIMATIONS
+   Spring pop in, quick shrink out
+========================================= */
+
+.modal:not(.hidden) .modal-content {
+  animation: modalSpringIn 0.35s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+@keyframes modalSpringIn {
+  0%   { opacity: 0; transform: scale(.88) translateY(12px); }
+  100% { opacity: 1; transform: scale(1)   translateY(0);    }
+}
+
+.modal-content.modal-closing {
+  animation: modalShrinkOut 0.18s ease-in forwards;
+}
+
+@keyframes modalShrinkOut {
+  0%   { opacity: 1; transform: scale(1);   }
+  100% { opacity: 0; transform: scale(.92); }
+}
+
+/* modal backdrop fade */
+.modal:not(.hidden) {
+  animation: backdropIn 0.25s ease forwards;
+}
+
+@keyframes backdropIn {
+  from { background: rgba(0,0,0,0);   }
+  to   { background: rgba(0,0,0,.55); }
+}
+
+/* =========================================
+   BUTTON PRESS ANIMATION
+========================================= */
+
+.camera-card button,
+.modal-actions button,
+.choice-btn,
+.sd-btn,
+.tab-button,
+.add-staff-btn,
+.footer-button,
+.toolbar-btn {
+  transition:
+    transform 0.12s cubic-bezier(.22,1,.36,1),
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.camera-card button:active,
+.modal-actions button:active,
+.choice-btn:active,
+.sd-btn:active,
+.toolbar-btn:active {
+  transform: scale(.94) translateY(1px) !important;
+  box-shadow: none !important;
+}
+
+/* =========================================
+   CAMERA CARD CASCADE
+   Cards stagger in one by one
+========================================= */
+
+.camera-card {
+  opacity: 0;
+  animation: cardCascade 0.4s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* stagger delays for up to 12 cards */
+.camera-card:nth-child(1)  { animation-delay: 0.04s; }
+.camera-card:nth-child(2)  { animation-delay: 0.08s; }
+.camera-card:nth-child(3)  { animation-delay: 0.12s; }
+.camera-card:nth-child(4)  { animation-delay: 0.16s; }
+.camera-card:nth-child(5)  { animation-delay: 0.20s; }
+.camera-card:nth-child(6)  { animation-delay: 0.24s; }
+.camera-card:nth-child(7)  { animation-delay: 0.28s; }
+.camera-card:nth-child(8)  { animation-delay: 0.32s; }
+.camera-card:nth-child(9)  { animation-delay: 0.36s; }
+.camera-card:nth-child(10) { animation-delay: 0.40s; }
+.camera-card:nth-child(11) { animation-delay: 0.44s; }
+.camera-card:nth-child(12) { animation-delay: 0.48s; }
+
+@keyframes cardCascade {
+  0%   { opacity: 0; transform: translateY(18px) scale(.97); }
+  100% { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+
+/* staff and log cards get same treatment */
+.staff-card {
+  opacity: 0;
+  animation: cardCascade 0.4s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.staff-card:nth-child(1)  { animation-delay: 0.04s; }
+.staff-card:nth-child(2)  { animation-delay: 0.08s; }
+.staff-card:nth-child(3)  { animation-delay: 0.12s; }
+.staff-card:nth-child(4)  { animation-delay: 0.16s; }
+.staff-card:nth-child(5)  { animation-delay: 0.20s; }
+.staff-card:nth-child(6)  { animation-delay: 0.24s; }
+.staff-card:nth-child(7)  { animation-delay: 0.28s; }
+.staff-card:nth-child(8)  { animation-delay: 0.32s; }
+
+.log-card {
+  opacity: 0;
+  animation: cardCascade 0.35s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.log-card:nth-child(1)  { animation-delay: 0.02s; }
+.log-card:nth-child(2)  { animation-delay: 0.05s; }
+.log-card:nth-child(3)  { animation-delay: 0.08s; }
+.log-card:nth-child(4)  { animation-delay: 0.11s; }
+.log-card:nth-child(5)  { animation-delay: 0.14s; }
+.log-card:nth-child(6)  { animation-delay: 0.17s; }
+.log-card:nth-child(7)  { animation-delay: 0.20s; }
+.log-card:nth-child(8)  { animation-delay: 0.23s; }
+.log-card:nth-child(9)  { animation-delay: 0.26s; }
+.log-card:nth-child(10) { animation-delay: 0.29s; }
+
+/* =========================================
+   TAB SWITCH SLIDE
+========================================= */
+
+.grid-slide-left {
+  animation: slideOutLeft 0.18s ease-in forwards;
+}
+
+.grid-slide-right {
+  animation: slideOutRight 0.18s ease-in forwards;
+}
+
+@keyframes slideOutLeft {
+  to { opacity: 0; transform: translateX(-24px); }
+}
+
+@keyframes slideOutRight {
+  to { opacity: 0; transform: translateX(24px); }
+}
+
+/* =========================================
+   ADMIN GLOW PULSE ON LOGIN
+========================================= */
+
+@keyframes adminLoginPulse {
+  0%   { box-shadow: 0 0 0   rgba(40,120,255,0);   }
+  50%  { box-shadow: 0 0 60px rgba(40,120,255,.6);  }
+  100% { box-shadow: 0 0 30px rgba(40,120,255,.35); }
+}
+
+.sidebar.admin-pulse {
+  animation: adminLoginPulse 0.7s ease forwards;
+}
+
+/* =========================================
+   SIDEBAR ICON BOUNCE ON TAB SWITCH
+========================================= */
+
+@keyframes iconBounce {
+  0%   { transform: scale(1);    }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(.94);  }
+  100% { transform: scale(1);    }
+}
+
+.tab-icon-bounce {
+  animation: iconBounce 0.35s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* =========================================
+   ADMIN TOGGLE SPIN ON LOGOUT
+========================================= */
+
+@keyframes adminIconSpin {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  50%  { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1);    }
+}
+
+.admin-spin {
+  animation: adminIconSpin 0.45s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* =========================================
+   STATUS PILL TRANSITION
+========================================= */
+
+.camera-status {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* =========================================
+   TOAST SLIDE UP
+========================================= */
+
+#toastNotif {
+  transition: opacity 0.4s ease, transform 0.35s cubic-bezier(.22,1,.36,1);
+  transform: translateX(-50%) translateY(0);
+}
+
+#toastNotif.toast-hidden {
+  opacity: 0 !important;
+  transform: translateX(-50%) translateY(12px);
+}
