@@ -302,11 +302,11 @@ body{
 ========================================= */
 
 .bottom-bar{
-  position:fixed;
-  left:96px;
-  right:0;
-  bottom:0;
-  height:46px;
+  position: fixed !important;
+  left: clamp(72px, 8vw, 100px);
+  right: 0;
+  bottom: 0 !important;
+  height: clamp(40px, 5vh, 52px);
   background:#000;
   color:#fff;
   display:flex;
@@ -314,7 +314,7 @@ body{
   justify-content:space-between;
   padding:0 18px;
   box-shadow:0 -2px 8px rgba(0,0,0,.15);
-  z-index:50;
+  z-index: 999;
 }
 
 .bottom-left{
@@ -850,10 +850,6 @@ body.admin-active .top-bar{
     margin-left:80px;
   }
 
-  .bottom-bar{
-    left:80px;
-  }
-
   .camera-grid{
     grid-template-columns:repeat(2,1fr);
     gap:14px;
@@ -1157,15 +1153,7 @@ button:disabled {
   height: clamp(48px, 6vh, 64px);
 }
 
-/* bottom bar — always fixed to bottom of screen */
-.bottom-bar {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: clamp(72px, 8vw, 100px);
-  right: 0;
-  height: clamp(40px, 5vh, 52px);
-  z-index: 50;
-}
+/* bottom bar positioning handled in main .bottom-bar rule above */
 
 /* camera grid padding and gap */
 .camera-grid {
